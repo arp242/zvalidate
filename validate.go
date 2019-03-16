@@ -46,6 +46,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"net/mail"
 	"net/url"
 	"regexp"
 	"sort"
@@ -53,8 +54,6 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
-
-	"github.com/teamwork/mailaddress"
 )
 
 // Validator hold the validation errors.
@@ -222,12 +221,8 @@ func (v *Validator) Required(key string, value interface{}, message ...string) {
 		if !val {
 			v.Append(key, msg)
 		}
-	case mailaddress.Address:
+	case mail.Address:
 		if val.Address == "" {
-			v.Append(key, msg)
-		}
-	case mailaddress.List:
-		if len(val) == 0 {
 			v.Append(key, msg)
 		}
 	case []string:
@@ -392,17 +387,18 @@ func (v *Validator) URL(key, value string, message ...string) *url.URL {
 }
 
 // Email validates if this email looks like a valid email address.
-func (v *Validator) Email(key, value string, message ...string) mailaddress.Address {
+func (v *Validator) Email(key, value string, message ...string) mail.Address {
 	if value == "" {
-		return mailaddress.Address{}
+		return mail.Address{}
 	}
 
 	msg := getMessage(message, MessageEmail)
-	addr, err := mailaddress.Parse(value)
+	addr, err := mail.ParseAddress(value)
 	if err != nil {
 		v.Append(key, msg)
+		return mail.Address{}
 	}
-	return addr
+	return *addr
 }
 
 // IPv4 validates that a string is a valid IPv4 address.

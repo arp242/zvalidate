@@ -3,12 +3,12 @@ package validate
 import (
 	"errors"
 	"fmt"
+	"net/mail"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/teamwork/mailaddress"
 )
 
 func TestRequiredInt(t *testing.T) {
@@ -273,15 +273,16 @@ func TestValidators(t *testing.T) {
 		// Required mailaddress
 		{
 			func(v Validator) {
-				v.Required("k1", mailaddress.Address{})
-				v.Required("k2", mailaddress.List{})
+				v.Required("k1", mail.Address{})
+				//v.Required("k2", mailaddress.List{})
 			},
-			map[string][]string{"k1": {"must be set"}, "k2": {"must be set"}},
+			//map[string][]string{"k1": {"must be set"}, "k2": {"must be set"}},
+			map[string][]string{"k1": {"must be set"}},
 		},
 		{
 			func(v Validator) {
-				v.Required("k1", mailaddress.Address{Address: "foo@example.com"})
-				v.Required("k2", mailaddress.List{mailaddress.New("", "asd")})
+				v.Required("k1", mail.Address{Address: "foo@example.com"})
+				//v.Required("k2", mailaddress.List{mailaddress.New("", "asd")})
 			},
 			make(map[string][]string),
 		},
