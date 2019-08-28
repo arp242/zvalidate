@@ -49,6 +49,10 @@ func (v *Validator) Required(key string, value interface{}, message ...string) {
 		if val.Address == "" {
 			v.Append(key, msg)
 		}
+	case []int64:
+		if len(val) == 0 {
+			v.Append(key, msg)
+		}
 	case []string:
 		if len(val) == 0 {
 			v.Append(key, msg)
