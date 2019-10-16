@@ -1,4 +1,4 @@
-module github.com/teamwork/validate
+module zgo.at/validate
 
 go 1.12
 

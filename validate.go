@@ -40,7 +40,7 @@
 //       return v
 //   }
 //   user := getUserByID(id)
-package validate // import "github.com/teamwork/validate"
+package validate // import "zgo.at/zcheck"
 
 import (
 	"encoding/json"
