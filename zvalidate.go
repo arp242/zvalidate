@@ -302,6 +302,8 @@ func (v *Validator) Include(key, value string, include []string, message ...stri
 //
 // Limitation: the RFC limits domain labels to 63 bytes, but this validation
 // accepts labels up to 63 *characters*.
+//
+// TODO: return parsed domain.
 func (v *Validator) Domain(key, value string, message ...string) {
 	if value == "" {
 		return
@@ -415,44 +417,59 @@ func (v *Validator) IPv4(key, value string, message ...string) net.IP {
 	return ip
 }
 
-var reValidHexColor = regexp.MustCompile(`(?i)^#[0-9a-f]{3,6}$`)
-
 // HexColor validates if the string looks like a color as a hex triplet (e.g.
 // #ffffff or #fff).
-func (v *Validator) HexColor(key, value string, message ...string) {
+func (v *Validator) HexColor(key, value string, message ...string) (int, int, int) {
 	if value == "" {
-		return
+		return 0, 0, 0
 	}
 
 	msg := getMessage(message, MessageHexColor)
-	if !reValidHexColor.MatchString(value) {
+
+	if value[0] != '#' { // || (len(value) == 4 || len(value) == 7) {
 		v.Append(key, msg)
+		return 0, 0, 0
 	}
+
+	var rgb []byte
+	if len(value) == 4 {
+		value = "#" +
+			strings.Repeat(string(value[1]), 2) +
+			strings.Repeat(string(value[2]), 2) +
+			strings.Repeat(string(value[3]), 2)
+	}
+
+	n, err := fmt.Sscanf(strings.ToLower(value), "#%x", &rgb)
+	if n != 1 || len(rgb) != 3 || err != nil {
+		v.Append(key, msg)
+		return 0, 0, 0
+	}
+
+	return int(rgb[0]), int(rgb[1]), int(rgb[2])
 }
 
-// Len sets the minimum and maximum length for a string in characters, not in
-// bytes.
+// Len sets the minimum and maximum length of a string in characters (not bytes).
 //
 // A maximum of 0 indicates there is no upper limit.
-func (v *Validator) Len(key, value string, min, max int, message ...string) {
+func (v *Validator) Len(key, value string, min, max int, message ...string) int {
 	msg := getMessage(message, "")
 
-	length := utf8.RuneCountInString(value)
-
+	l := utf8.RuneCountInString(value)
 	switch {
-	case length < min:
+	case l < min:
 		if msg != "" {
 			v.Append(key, msg)
 		} else {
 			v.Append(key, fmt.Sprintf(MessageLenLonger, min))
 		}
-	case max > 0 && length > max:
+	case max > 0 && l > max:
 		if msg != "" {
 			v.Append(key, msg)
 		} else {
 			v.Append(key, fmt.Sprintf(MessageLenShorter, max))
 		}
 	}
+	return l
 }
 
 // Integer checks if this looks like an integer (i.e. a whole number).
@@ -485,9 +502,9 @@ func (v *Validator) Boolean(key, value string, message ...string) bool {
 }
 
 // Date checks if the string looks like a date in the given layout.
-func (v *Validator) Date(key, value, layout string, message ...string) {
+func (v *Validator) Date(key, value, layout string, message ...string) time.Time {
 	msg := getMessage(message, "")
-	_, err := time.Parse(layout, value)
+	t, err := time.Parse(layout, value)
 	if err != nil {
 		if msg != "" {
 			v.Append(key, msg)
@@ -495,6 +512,7 @@ func (v *Validator) Date(key, value, layout string, message ...string) {
 			v.Append(key, fmt.Sprintf(MessageDate, layout))
 		}
 	}
+	return t
 }
 
 var rePhone = regexp.MustCompile(`^[0123456789+\-() .]{5,20}$`)
@@ -506,6 +524,8 @@ var rePhone = regexp.MustCompile(`^[0123456789+\-() .]{5,20}$`)
 //
 // This merely checks a field contains 5 to 20 characters "0123456789+\-() .",
 // which is not very strict but should cover all conventions.
+//
+// TODO: return parsed phone number.
 func (v *Validator) Phone(key, value string, message ...string) {
 	if value == "" {
 		return
