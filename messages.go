@@ -1,4 +1,4 @@
-package validate
+package zvalidate
 
 // Messages for the checkers; this can be changed for i18n.
 var (

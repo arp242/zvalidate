@@ -1,4 +1,4 @@
-package validate
+package zvalidate
 
 import (
 	"errors"

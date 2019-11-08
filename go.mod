@@ -1,4 +1,4 @@
-module zgo.at/validate
+module zgo.at/zvalidate
 
 go 1.12
 

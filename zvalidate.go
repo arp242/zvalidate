@@ -1,8 +1,8 @@
-// Package validate provides simple validation for Go.
+// Package zvalidate provides simple validation for Go.
 //
 // Basic usage example:
 //
-//   v := validate.New()
+//   v := zvalidate.New()
 //   v.Required("firstName", customer.FirstName)
 //   if v.HasErrors() {
 //       fmt.Println("Had the following validation errors:")
@@ -34,13 +34,13 @@
 // Some validators return the parsed value, which makes it easier both validate
 // and get a useful value at the same time:
 //
-//   v := validate.New()
+//   v := zvalidate.New()
 //   id := v.Integer("id", c.Param("id"))
 //   if v.HasErrors() {
 //       return v
 //   }
 //   user := getUserByID(id)
-package validate // import "zgo.at/zcheck"
+package zvalidate // import "zgo.at/zvalidate"
 
 import (
 	"encoding/json"
@@ -119,7 +119,7 @@ func (v *Validator) ErrorOrNil() error {
 //
 // For example:
 //
-//   v := validate.New()
+//   v := zvalidate.New()
 //   v.Required("name", customer.Name)
 //
 //   // e.g. "settings.domain"
@@ -244,7 +244,7 @@ func (v *Validator) Required(key string, value interface{}, message ...string) {
 			v.Append(key, msg)
 		}
 	default:
-		panic(fmt.Sprintf("validate: not a supported type: %T", value))
+		panic(fmt.Sprintf("zvalidate: not a supported type: %T", value))
 	}
 }
 
