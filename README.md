@@ -15,4 +15,7 @@ Basic usage example:
 		}
 	}
 
+When possible validators parse the value and return the result; e.g. `Email()`
+returns `mail.Address`.
+
 See godoc for more info.
