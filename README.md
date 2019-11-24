@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/zgoat/zvalidate.svg?branch=master)](https://travis-ci.org/zgoat/zvalidate)
 [![codecov](https://codecov.io/gh/zgoat/zvalidate/branch/master/graph/badge.svg?token=n0k8YjbQOL)](https://codecov.io/gh/zgoat/zvalidate)
-[![GoDoc](https://godoc.org/github.com/zgoat/zvalidate?status.svg)](https://godoc.org/github.com/zgoat/zvalidate)
+[![GoDoc](https://godoc.org/zgo.at/zvalidate?status.svg)](https://godoc.org/zgo.at/zvalidate)
 
 Validation for Go.
 
