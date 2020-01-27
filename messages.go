@@ -7,6 +7,7 @@ var (
 	MessageURL         = "must be a valid url"
 	MessageEmail       = "must be a valid email address"
 	MessageIPv4        = "must be a valid IPv4 address"
+	MessageIP          = "must be a valid IPv4 or IPv6 address"
 	MessageHexColor    = "must be a valid color code"
 	MessageLenLonger   = "must be longer than %d characters"
 	MessageLenShorter  = "must be shorter than %d characters"

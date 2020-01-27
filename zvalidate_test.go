@@ -579,6 +579,45 @@ func TestValidators(t *testing.T) {
 			map[string][]string{"v": {"must be a valid IPv4 address"}},
 		},
 
+		// IP
+		{
+			func(v Validator) { v.IP("v", "") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.IP("v", "127.0.0.1") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.IP("v", "::1") },
+			make(map[string][]string),
+		},
+
+		{
+			func(v Validator) { v.IP("v", "127.0.0.4/8") },
+			map[string][]string{"v": {"must be a valid IPv4 or IPv6 address"}},
+		},
+		{
+			func(v Validator) { v.IP("v", "127.0.0.4/8", "foo") },
+			map[string][]string{"v": {"foo"}},
+		},
+		{
+			func(v Validator) { v.IP("v", "127.1") }, // Technically correct but Go doesn't seem to like it.
+			map[string][]string{"v": {"must be a valid IPv4 or IPv6 address"}},
+		},
+		{
+			func(v Validator) { v.IP("v", "127.0.0.506") },
+			map[string][]string{"v": {"must be a valid IPv4 or IPv6 address"}},
+		},
+		{
+			func(v Validator) { v.IP("v", "127.") },
+			map[string][]string{"v": {"must be a valid IPv4 or IPv6 address"}},
+		},
+		{
+			func(v Validator) { v.IP("v", "asdf") },
+			map[string][]string{"v": {"must be a valid IPv4 or IPv6 address"}},
+		},
+
 		// Phone
 		{
 			func(v Validator) { v.Phone("v", "") },

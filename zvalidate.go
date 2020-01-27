@@ -417,6 +417,20 @@ func (v *Validator) IPv4(key, value string, message ...string) net.IP {
 	return ip
 }
 
+// IP validates that a string is a valid IPv4 or IPv6 address.
+func (v *Validator) IP(key, value string, message ...string) net.IP {
+	if value == "" {
+		return net.IP{}
+	}
+
+	msg := getMessage(message, MessageIP)
+	ip := net.ParseIP(value)
+	if ip == nil {
+		v.Append(key, msg)
+	}
+	return ip
+}
+
 // HexColor validates if the string looks like a color as a hex triplet (e.g.
 // #ffffff or #fff).
 func (v *Validator) HexColor(key, value string, message ...string) (int, int, int) {
