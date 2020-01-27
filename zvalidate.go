@@ -65,9 +65,7 @@ type Validator struct {
 
 // New makes a new Validator and ensures that it is properly initialized.
 func New() Validator {
-	v := Validator{}
-	v.Errors = make(map[string][]string)
-	return v
+	return Validator{Errors: make(map[string][]string)}
 }
 
 // Error interface.
@@ -109,7 +107,7 @@ func (v *Validator) ErrorOrNil() error {
 	return nil
 }
 
-// Sub allows to specific sub-validations.
+// Sub allows adding sub-validations.
 //
 // Errors from the subvalidation are merged with the top-level one, the keys are
 // added as "top.sub" or "top[n].sub".
@@ -182,17 +180,15 @@ func (v *Validator) String() string {
 
 	var b strings.Builder
 	for _, k := range keys {
-		s := fmt.Sprintf("%s: %s.\n", k, strings.Join(v.Errors[k], ", "))
-		b.WriteString(s)
-
+		b.WriteString(fmt.Sprintf("%s: %s.\n", k, strings.Join(v.Errors[k], ", ")))
 	}
 	return b.String()
 }
 
 // Required indicates that this value must not be the type's zero value.
 //
-// Currently supported types are string, int, int64, uint, and uint64. It will
-// panic if the type is not supported.
+// Currently supported types are string, int, int64, uint, uint64, bool,
+// []string, and mail.Address. It will panic if the type is not supported.
 func (v *Validator) Required(key string, value interface{}, message ...string) {
 	msg := getMessage(message, MessageRequired)
 
@@ -433,14 +429,14 @@ func (v *Validator) IP(key, value string, message ...string) net.IP {
 
 // HexColor validates if the string looks like a color as a hex triplet (e.g.
 // #ffffff or #fff).
-func (v *Validator) HexColor(key, value string, message ...string) (int, int, int) {
+func (v *Validator) HexColor(key, value string, message ...string) (uint8, uint8, uint8) {
 	if value == "" {
 		return 0, 0, 0
 	}
 
 	msg := getMessage(message, MessageHexColor)
 
-	if value[0] != '#' { // || (len(value) == 4 || len(value) == 7) {
+	if value[0] != '#' {
 		v.Append(key, msg)
 		return 0, 0, 0
 	}
@@ -459,10 +455,10 @@ func (v *Validator) HexColor(key, value string, message ...string) (int, int, in
 		return 0, 0, 0
 	}
 
-	return int(rgb[0]), int(rgb[1]), int(rgb[2])
+	return rgb[0], rgb[1], rgb[2]
 }
 
-// Len sets the minimum and maximum length of a string in characters (not bytes).
+// Len validates the length of a string in characters (not bytes).
 //
 // A maximum of 0 indicates there is no upper limit.
 func (v *Validator) Len(key, value string, min, max int, message ...string) int {
