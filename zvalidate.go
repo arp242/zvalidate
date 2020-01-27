@@ -535,16 +535,19 @@ var rePhone = regexp.MustCompile(`^[0123456789+\-() .]{5,20}$`)
 // This merely checks a field contains 5 to 20 characters "0123456789+\-() .",
 // which is not very strict but should cover all conventions.
 //
-// TODO: return parsed phone number.
-func (v *Validator) Phone(key, value string, message ...string) {
+// Returns the phone number with grouping/spacing characters removed.
+func (v *Validator) Phone(key, value string, message ...string) string {
 	if value == "" {
-		return
+		return ""
 	}
 
 	msg := getMessage(message, MessagePhone)
 	if !rePhone.MatchString(value) {
 		v.Append(key, msg)
 	}
+
+	return strings.NewReplacer("-", "", "(", "", ")", "", " ", "", ".", "").
+		Replace(value)
 }
 
 // Range sets the minimum and maximum value of a integer.
