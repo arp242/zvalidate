@@ -850,3 +850,29 @@ func TestErrorOrNil(t *testing.T) {
 		})
 	}
 }
+
+func TestDomain(t *testing.T) {
+	tests := []struct {
+		in   string
+		want []string
+	}{
+		{"xn--bcher-kva.example", []string{"bücher", "example"}},
+		{"www.example.com", []string{"www", "example", "com"}},
+		{"www.example.com.", []string{"www", "example", "com"}},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			v := New()
+			out := v.Domain("", tt.in)
+
+			if v.HasErrors() {
+				t.Fatal(v.Error())
+			}
+
+			if !reflect.DeepEqual(out, tt.want) {
+				t.Errorf("\nout:  %#v\nwant: %#v\n", out, tt.want)
+			}
+		})
+	}
+}

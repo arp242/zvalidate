@@ -53,6 +53,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -299,37 +300,60 @@ func (v *Validator) Include(key, value string, include []string, message ...stri
 // Limitation: the RFC limits domain labels to 63 bytes, but this validation
 // accepts labels up to 63 *characters*.
 //
-// TODO: return parsed domain.
-func (v *Validator) Domain(key, value string, message ...string) {
+// Returns the list of labels.
+func (v *Validator) Domain(key, value string, message ...string) []string {
 	if value == "" {
-		return
+		return nil
 	}
 
 	msg := getMessage(message, MessageDomain)
-	if !validDomain(value) {
+	labels := validDomain(value)
+	if labels == nil {
 		v.Append(key, msg)
 	}
+	return labels
 }
 
-var reValidDomain = regexp.MustCompile(`` +
-	// Anchor
-	`^` +
+func validDomain(value string) []string {
+	if len(value) < 3 || value[0] == '.' {
+		return nil
+	}
+	if value[len(value)-1] == '.' {
+		value = value[:len(value)-1]
+	}
 
-	// See RFC 1034, section 3.1, RFC 1035, secion 2.3.1
-	//
-	// - Only allow letters, numbers
-	// - Max size of a single label is 63 characters (RFC specifies bytes, but that's
-	//   not so easy to check AFAIK).
-	// - Need at least two labels
-	`[\p{L}\d-]{1,63}` + // Label
-	`(\.[\p{L}\d-]{1,63})+` + // More labels
+	labels := strings.Split(value, ".")
+	if len(labels) < 2 {
+		return nil
+	}
 
-	// Anchor
-	`$`,
-)
+	for i, l := range labels {
+		// See RFC 1034, section 3.1, RFC 1035, secion 2.3.1
+		//
+		// - Only allow letters, numbers
+		// - Max size of a single label is 63 characters
+		// - Need at least two labels
+		if len(l) > 63 {
+			return nil
+		}
 
-func validDomain(v string) bool {
-	return reValidDomain.MatchString(v)
+		if strings.HasPrefix(l, "xn--") {
+			var err error
+			l, err = punyDecode(l[4:])
+			if err != nil {
+				return nil
+			}
+			labels[i] = l
+		}
+
+		for _, c := range l {
+			if !unicode.IsLetter(c) && !unicode.IsDigit(c) && c != '-' {
+				return nil
+			}
+		}
+	}
+
+	return labels
 }
 
 // URL validates that the string contains a valid URL.
@@ -376,7 +400,7 @@ func (v *Validator) URL(key, value string, message ...string) *url.URL {
 		host = h
 	}
 
-	if !validDomain(host) {
+	if len(validDomain(host)) == 0 {
 		v.Append(key, msg)
 		return nil
 	}
