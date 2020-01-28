@@ -2,14 +2,18 @@
 //
 // Basic usage example:
 //
-//   v := zvalidate.New()
-//   v.Required("firstName", customer.FirstName)
-//   if v.HasErrors() {
-//       fmt.Println("Had the following validation errors:")
-//       for key, errors := range v.Errors {
-//           fmt.Printf("    %s: %s", key, strings.Join(errors))
-//       }
-//   }
+//    v := zvalidate.New()
+//    v.Required("email", customer.Email)
+//    m := v.Email("email", customer.Email)
+//
+//    if v.HasErrors() {
+//        fmt.Println("Had the following validation errors:")
+//        for key, errors := range v.Errors {
+//            fmt.Printf("    %s: %s", key, strings.Join(errors))
+//        }
+//    }
+//
+//    fmt.Printf("parsed email: %q <%s>\n", m.Name, m.Address)
 //
 // All validators treat the input's zero type (empty string, 0, nil, etc.) as
 // valid. Use the Required() validator if you want to make a parameter required.
@@ -30,16 +34,6 @@
 //   if !condition {
 //       v.Append("key", "must be a valid foo")
 //   }
-//
-// Some validators return the parsed value, which makes it easier both validate
-// and get a useful value at the same time:
-//
-//   v := zvalidate.New()
-//   id := v.Integer("id", c.Param("id"))
-//   if v.HasErrors() {
-//       return v
-//   }
-//   user := getUserByID(id)
 package zvalidate // import "zgo.at/zvalidate"
 
 import (
@@ -297,9 +291,6 @@ func (v *Validator) Include(key, value string, include []string, message ...stri
 // This works for internationalized domain names (IDN), either as UTF-8
 // characters or as punycode.
 //
-// Limitation: the RFC limits domain labels to 63 bytes, but this validation
-// accepts labels up to 63 *characters*.
-//
 // Returns the list of labels.
 func (v *Validator) Domain(key, value string, message ...string) []string {
 	if value == "" {
@@ -482,7 +473,7 @@ func (v *Validator) HexColor(key, value string, message ...string) (uint8, uint8
 	return rgb[0], rgb[1], rgb[2]
 }
 
-// Len validates the length of a string in characters (not bytes).
+// Len validates the character length of a string.
 //
 // A maximum of 0 indicates there is no upper limit.
 func (v *Validator) Len(key, value string, min, max int, message ...string) int {
