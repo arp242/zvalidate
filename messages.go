@@ -1,6 +1,6 @@
 package zvalidate
 
-// Messages for the checkers; this can be changed for i18n.
+// Messages for the validations; this can be changed for i18n.
 var (
 	MessageRequired    = "must be set"
 	MessageDomain      = "must be a valid domain"
