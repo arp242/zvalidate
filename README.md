@@ -5,12 +5,13 @@
 Simple validation for Go. Some things that make it different from the (many)
 other libraries:
 
+- No struct tags – which I don't find a good tool for this – just functions.
 - Validations return parsed values.
-- No struct tags, which I don't find a good tool for this kind of thing.
 - Easy to display validation errors in UI.
-- Doesn't use reflection (other than type assertions).
+- Doesn't use reflection (other than type assertions); mostly typed.
 - No external dependencies.
 - Easy to add nested validations.
+- Not tied to HTTP (useful for validating CLI flags, for example).
 
 I originally wrote this at my previous employer
 ([github.com/teamwork/validate][tw]), this is an improved (and incompatible)
@@ -18,7 +19,7 @@ version.
 
 [tw]: https://github.com/teamwork/validate
 
-Basic usage example:
+Basic example:
 
 ```go
 email := "martin@arp42.net"
@@ -37,14 +38,14 @@ fmt.Printf("parsed email: %s\n", m.Address)
 All validators are just method calls on the `Validator` struct, and follow the
 same patterns:
 
-- treat the input's zero type (empty string, 0, nil, etc.) as valid (use the
-  `Required()` validator if you want to make a parameter required);
+- The input's zero type (empty string, 0, nil, etc.) is valid. Use the
+  `Required()` validator if you want to make a parameter required).
 
-- have `key string, value [..]` as the first two arguments, where `key` is the
+- `key string, value [..]` are the first two arguments, where `key` is the
   parameter name (to display in the error or next to a form) and `value` is what
-  we want validated (type of `value` depends on validation);
+  we want validated (type of `value` depends on validation).
 
-- optionally accept a custom message as the last parameter.
+- Optionally accept a custom message as the last parameter.
 
 The error text only includes a simple human description such as *"must be set"*
 or *"must be a valid email"*. When adding new validations, make sure that they
@@ -91,10 +92,6 @@ Nested validations
 `Sub()` allows adding nested subvalidations; this is useful if a form creates
 more than one object.
 
-Nothing is nested in the `Errors` data structure (which is just a
-`map[string][]string`, and is mostly just a bit of code to create consistent
-keys.
-
 For example:
 
 ```go
@@ -116,8 +113,8 @@ for i, a := range customer.Addresses {
 This will be added as `addresses[0].city`, `addresses[1].city`, etc.
 
 If the error is not a `Validator` then the `Error()` text will be added as just
-the key name without subkey (same as v.Append("key", "msg"); this is mostly to
-support cases like:
+the key name without subkey (same as `v.Append("key", "msg")`); this is mostly
+to support cases like:
 
 ```go
 func (Customer c) Validate() {
@@ -144,10 +141,11 @@ errors; usually you want to return `ErrorOrNil()`.
 The general idea is that validation errors should usually be displayed along the
 input element, instead of a list in a flash message (but you can do either).
 
-- To display a **flash message** just call `String()` or `HTML()`.
+- To display a **flash message** or **CLI** just call `String()` or `HTML()`.
 
 - For **Go templates** there is a `TemplateError()` helper which can be added to
-  the `template.FuncMap`. See the godoc for that function for details.
+  the `template.FuncMap`. See the godoc for that function for details and an
+  example.
 
 - For **JavaScript** `Errors` is represented as `map[string][]string`, and
   marshals well to JSON; in your frontend you just have to find the input
