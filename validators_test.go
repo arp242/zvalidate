@@ -362,8 +362,6 @@ func TestValidators(t *testing.T) {
 		},
 
 		// Email
-		// Don't need to extensively validate emails, we have tests for that in
-		// the mailaddress package already.
 		{
 			func(v Validator) { v.Email("v", "") },
 			make(map[string][]string),
@@ -374,6 +372,10 @@ func TestValidators(t *testing.T) {
 		},
 		{
 			func(v Validator) { v.Email("v", "martin") },
+			map[string][]string{"v": {"must be a valid email address"}},
+		},
+		{
+			func(v Validator) { v.Email("v", "martin@domain") },
 			map[string][]string{"v": {"must be a valid email address"}},
 		},
 		{

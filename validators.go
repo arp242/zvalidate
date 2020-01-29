@@ -244,6 +244,14 @@ func (v *Validator) Email(key, value string, message ...string) mail.Address {
 		v.Append(key, msg)
 		return mail.Address{}
 	}
+
+	// "foo@domain" is technically valid, but practically never what's intended.
+	domain := addr.Address[strings.LastIndex(addr.Address, "@")+1:]
+	if !strings.ContainsRune(domain, '.') {
+		v.Append(key, msg)
+		return mail.Address{}
+	}
+
 	return *addr
 }
 
