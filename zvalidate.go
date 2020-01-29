@@ -71,6 +71,23 @@ func (v *Validator) Append(key, value string, format ...interface{}) {
 	v.Errors[key] = append(v.Errors[key], fmt.Sprintf(value, format...))
 }
 
+// Pop an error, removing it from the validator list.
+//
+// This is mostly useful when displaying errors next to forms: Pop() all the
+// errors you want to display, and then display anything that's left with a
+// flash message or the like. This prevents "hidden" errors.
+//
+// Returns nil if there are no errors for this key.
+func (v *Validator) Pop(key string) []string {
+	if len(v.Errors[key]) == 0 {
+		return nil
+	}
+
+	errs := v.Errors[key]
+	delete(v.Errors, key)
+	return errs
+}
+
 // HasErrors reports if this validation has any errors.
 func (v *Validator) HasErrors() bool {
 	return len(v.Errors) > 0

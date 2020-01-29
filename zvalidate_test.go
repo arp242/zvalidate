@@ -217,3 +217,66 @@ func TestErrorOrNil(t *testing.T) {
 		})
 	}
 }
+
+func TestPop(t *testing.T) {
+	v := New()
+	v.Append("a", "err")
+	v.Append("a", "err2")
+	v.Append("b", "err3")
+
+	{ // Non-existing key.
+		out := v.Pop("nonexistent")
+		var want []string
+		if !reflect.DeepEqual(out, want) {
+			t.Errorf("wrong return\nout:  %#v\nwant: %#v", out, want)
+		}
+
+		wantErr := map[string][]string{"a": {"err", "err2"}, "b": {"err3"}}
+		if d := cmp.Diff(v.Errors, wantErr); d != "" {
+			t.Errorf("(-got +want)\n:%s", d)
+		}
+	}
+
+	{ // pop "a"
+		out := v.Pop("a")
+		want := []string{"err", "err2"}
+		if !reflect.DeepEqual(out, want) {
+			t.Errorf("wrong return\nout:  %#v\nwant: <nil>", out)
+		}
+
+		wantErr := map[string][]string{"b": {"err3"}}
+		if d := cmp.Diff(v.Errors, wantErr); d != "" {
+			t.Errorf("(-got +want)\n:%s", d)
+		}
+	}
+
+	{ // pop "a" again, nothing should happen.
+		out := v.Pop("a")
+		var want []string
+		if !reflect.DeepEqual(out, want) {
+			t.Errorf("wrong return\nout:  %#v\nwant: <nil>", out)
+		}
+
+		wantErr := map[string][]string{"b": {"err3"}}
+		if d := cmp.Diff(v.Errors, wantErr); d != "" {
+			t.Errorf("(-got +want)\n:%s", d)
+		}
+	}
+
+	{ // pop "b.
+		out := v.Pop("b")
+		want := []string{"err3"}
+		if !reflect.DeepEqual(out, want) {
+			t.Errorf("wrong return\nout:  %#v\nwant: <nil>", out)
+		}
+
+		wantErr := map[string][]string{}
+		if d := cmp.Diff(v.Errors, wantErr); d != "" {
+			t.Errorf("(-got +want)\n:%s", d)
+		}
+	}
+
+	if v.HasErrors() {
+		t.Errorf("v.HasErrors(): %#v", v.Errors)
+	}
+}

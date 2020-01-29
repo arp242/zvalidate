@@ -2,12 +2,11 @@
 [![codecov](https://codecov.io/gh/zgoat/zvalidate/branch/master/graph/badge.svg?token=n0k8YjbQOL)](https://codecov.io/gh/zgoat/zvalidate)
 [![GoDoc](https://godoc.org/zgo.at/zvalidate?status.svg)](https://pkg.go.dev/zgo.at/zvalidate)
 
-Simple validation for Go.
-
-Some things that make it different from the (many) other libraries:
+Simple validation for Go. Some things that make it different from the (many)
+other libraries:
 
 - Validations return parsed values.
-- No use struct tags, which I don't find a good tool for this kind of thing.
+- No struct tags, which I don't find a good tool for this kind of thing.
 - Easy to display validation errors in UI.
 - Doesn't use reflection (other than type assertions).
 - Has no external dependencies.
@@ -177,8 +176,9 @@ And then use it:
     {{validate "site.settings.data_retention" .Validate}}
 
 **caveat**: if there is an error with a corresponding form element then that
-won't be displayed.
-
+won't be displayed. This is why the above examples `Pop()` all the errors they
+want to display, and then display anything that's left. This prevents "hidden"
+errors.
 
 ### i18n
 
