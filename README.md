@@ -144,36 +144,44 @@ errors; usually you want to return `ErrorOrNil()`.
 The general idea is that validation errors should usually be displayed along the
 input element, instead of a list in a flash message (but you can do either).
 
-To display a flash message just call `String()` or `HTML()`.
+- To display a **flash message** just call `String()` or `HTML()`.
 
-`Errors` is represented as `map[string][]string`, and marshals well to JSON; in
-your frontend you just have to find the input belonging to the map key:
+- For **Go templates** there is a `TemplateError()` helper which can be added to
+  the `template.FuncMap`. See the godoc for that function for details.
 
-```
-// TODO
-```
+- For **JavaScript** `Errors` is represented as `map[string][]string`, and
+  marshals well to JSON; in your frontend you just have to find the input
+  belonging to the map key. A simple example might be:
 
-In Go templates:
+  ```javascript
+  var display_errors = function(errors) {
+      var hidden = '';
+      for (var k in errors) {
+          if (!errors.hasOwnProperty(k))
+              continue;
 
-```go
-template.FuncMap["validate"] = func(k string, v map[string][]string) template.HTML {
-    if v == nil {
-        return template.HTML("")
-    }
-    e, ok := v[k]
-    if !ok {
-        return template.HTML("")
-    }
-    return template.HTML(fmt.Sprintf(`<span class="err">Error: %s</span>`,
-        template.HTMLEscapeString(strings.Join(e, ", "))))
-}
-```
+          var elem = document.querySelector('*[name=' + k + ']')
+          if (!elem) {
+              hidden += k + ': ' + errors[k].join(', ');
+              continue;
+          }
 
-And then use it:
+          var err = document.createElement('span');
+          err.className = 'err';
+          err.innerHTML = 'Error: ' + errors[k].join(', ') + '.';
+          elem.insertAdjacentElement('afterend', err);
+      }
 
-    <label for="data_retention">Data retention in days</label>
-    <input type="number" name="settings.data_retention" id="limits_page" value="{{.Site.Settings.DataRetention}}">
-    {{validate "site.settings.data_retention" .Validate}}
+      if (hidden !== '')
+          alert(hidden);
+  };
+
+  display_errors({
+      'xxx':    ['oh noes', 'asd'],
+      'hidden': ['asd'],
+  });
+  ```
+
 
 **caveat**: if there is an error with a corresponding form element then that
 won't be displayed. This is why the above examples `Pop()` all the errors they
