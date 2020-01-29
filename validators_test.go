@@ -113,18 +113,33 @@ func TestValidators(t *testing.T) {
 
 		// Required mailaddress
 		{
-			func(v Validator) {
-				v.Required("k1", mail.Address{})
-				//v.Required("k2", mailaddress.List{})
-			},
-			//map[string][]string{"k1": {"must be set"}, "k2": {"must be set"}},
+			func(v Validator) { v.Required("k1", mail.Address{}) },
 			map[string][]string{"k1": {"must be set"}},
 		},
 		{
-			func(v Validator) {
-				v.Required("k1", mail.Address{Address: "foo@example.com"})
-				//v.Required("k2", mailaddress.List{mailaddress.New("", "asd")})
-			},
+			func(v Validator) { v.Required("k1", &mail.Address{}) },
+			map[string][]string{"k1": {"must be set"}},
+		},
+		{
+			func(v Validator) { v.Required("k1", mail.Address{Address: "foo@example.com"}) },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Required("k1", &mail.Address{Address: "foo@example.com"}) },
+			make(map[string][]string),
+		},
+
+		// Required Time
+		{
+			func(v Validator) { v.Required("k1", time.Time{}) },
+			map[string][]string{"k1": {"must be set"}},
+		},
+		{
+			func(v Validator) { v.Required("k1", &time.Time{}) },
+			map[string][]string{"k1": {"must be set"}},
+		},
+		{
+			func(v Validator) { v.Required("k1", time.Now()) },
 			make(map[string][]string),
 		},
 

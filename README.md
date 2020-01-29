@@ -9,7 +9,7 @@ other libraries:
 - No struct tags, which I don't find a good tool for this kind of thing.
 - Easy to display validation errors in UI.
 - Doesn't use reflection (other than type assertions).
-- Has no external dependencies.
+- No external dependencies.
 - Easy to add nested validations.
 
 I originally wrote this at my previous employer
@@ -21,11 +21,10 @@ version.
 Basic usage example:
 
 ```go
-name := "Martin"
 email := "martin@arp42.net"
 
 v := zvalidate.New()
-v.Required("email", name)
+v.Required("email", email)
 m := v.Email("email", email)
 
 if v.HasErrors() {
@@ -136,7 +135,8 @@ func (Customer c) Validate() {
 }
 ```
 
-### Displaying errors
+Displaying errors
+-----------------
 
 The `Validator` type satisfies the `error` interface, so you can return them as
 errors; usually you want to return `ErrorOrNil()`.
@@ -188,7 +188,8 @@ won't be displayed. This is why the above examples `Pop()` all the errors they
 want to display, and then display anything that's left. This prevents "hidden"
 errors.
 
-### i18n
+i18n
+----
 
 There is no direct support for i18n, but the messages are all exported as
 `Message*` and can be replaced by your i18n system of choice.

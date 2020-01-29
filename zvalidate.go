@@ -1,40 +1,7 @@
 // Package zvalidate provides simple validation for Go.
 //
-// Basic usage example:
-//
-//    v := zvalidate.New()
-//    v.Required("email", customer.Email)
-//    m := v.Email("email", customer.Email)
-//
-//    if v.HasErrors() {
-//        fmt.Println("Had the following validation errors:")
-//        for key, errors := range v.Errors {
-//            fmt.Printf("    %s: %s", key, strings.Join(errors))
-//        }
-//    }
-//
-//    fmt.Printf("parsed email: %q <%s>\n", m.Name, m.Address)
-//
-// All validators treat the input's zero type (empty string, 0, nil, etc.) as
-// valid. Use the Required() validator if you want to make a parameter required.
-//
-// All validators optionally accept a custom message as the last parameter:
-//
-//   v.Required("key", value, "you really need to set this")
-//
-// The error text only includes a simple human description such as "must be set"
-// or "must be a valid email". When adding new validations, make sure that they
-// can be displayed properly when joined with commas. A text such as "Error:
-// this field must be higher than 42" would look weird:
-//
-//   must be set, Error: this field must be higher than 42
-//
-// You can set your own errors with v.Append():
-//
-//   if !condition {
-//       v.Append("key", "must be a valid foo")
-//   }
-package zvalidate // import "zgo.at/zvalidate"
+// See the README.markdown for an introduction.
+package zvalidate
 
 import (
 	"encoding/json"
@@ -51,7 +18,7 @@ type Validator struct {
 	Errors map[string][]string `json:"errors"`
 }
 
-// New makes a new Validator and ensures that it is properly initialized.
+// New initializes a new Validator.
 func New() Validator {
 	return Validator{Errors: make(map[string][]string)}
 }
@@ -66,12 +33,12 @@ func (v Validator) Code() int { return 400 }
 // ErrorJSON for reporting errors as JSON.
 func (v Validator) ErrorJSON() ([]byte, error) { return json.Marshal(v) }
 
-// Append a new error to the error list for this key.
+// Append a new error.
 func (v *Validator) Append(key, value string, format ...interface{}) {
 	v.Errors[key] = append(v.Errors[key], fmt.Sprintf(value, format...))
 }
 
-// Pop an error, removing it from the validator list.
+// Pop an error, removing all errors for this key.
 //
 // This is mostly useful when displaying errors next to forms: Pop() all the
 // errors you want to display, and then display anything that's left with a
@@ -113,7 +80,7 @@ func (v *Validator) ErrorOrNil() error {
 	return nil
 }
 
-// Sub allows adding sub-validations.
+// Sub adds sub-validations.
 //
 // Errors from the subvalidation are merged with the top-level one, the keys are
 // added as "top.sub" or "top[n].sub".
@@ -126,10 +93,10 @@ func (v *Validator) ErrorOrNil() error {
 //   v := zvalidate.New()
 //   v.Required("name", customer.Name)
 //
-//   // e.g. "settings.domain"
+//   // key: "settings.domain"
 //   v.Sub("settings", -1, customer.Settings.Validate())
 //
-//   // e.g. "addresses[1].city"
+//   // key: "addresses[1].city"
 //   for i, a := range customer.Addresses {
 //       a.Sub("addresses", i, c.Validate())
 //   }
@@ -168,8 +135,7 @@ func (v *Validator) Merge(other Validator) {
 	}
 }
 
-// Strings representation of all errors, or a blank string if there are no
-// errors.
+// Strings representation of all errors, or a blank string if there are none.
 func (v *Validator) String() string {
 	if !v.HasErrors() {
 		return ""
@@ -191,7 +157,7 @@ func (v *Validator) String() string {
 	return b.String()
 }
 
-// HTML representation of all errors, or a blank string if there are no errors.
+// HTML representation of all errors, or a blank string if there are none.
 func (v *Validator) HTML() template.HTML {
 	if !v.HasErrors() {
 		return ""

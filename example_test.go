@@ -8,12 +8,11 @@ import (
 	"zgo.at/zvalidate"
 )
 
-func ExampleMain() {
-	name := "Martin"
+func Example() {
 	email := "martin@arp42.net"
 
 	v := zvalidate.New()
-	v.Required("email", name)
+	v.Required("email", email)
 	m := v.Email("email", email)
 
 	if v.HasErrors() {

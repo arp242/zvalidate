@@ -13,7 +13,7 @@ import (
 	"unicode/utf8"
 )
 
-// Required indicates that this value must not be the type's zero value.
+// Required validates that the value is not the type's zero value.
 //
 // Currently supported types are string, int, int64, uint, uint64, bool,
 // []string, and mail.Address. It will panic if the type is not supported.
@@ -21,6 +21,12 @@ func (v *Validator) Required(key string, value interface{}, message ...string) {
 	msg := getMessage(message, MessageRequired)
 
 	switch val := value.(type) {
+	default:
+		// This is an appropiate use of panic, as it's a programming error that
+		// should be displayed ASAP. Adding a "validation error" would be
+		// inappropriate, and returning an error cumbersome.
+		panic(fmt.Sprintf("zvalidate: not a supported type: %T", value))
+
 	case string:
 		if strings.TrimSpace(val) == "" {
 			v.Append(key, msg)
@@ -45,10 +51,7 @@ func (v *Validator) Required(key string, value interface{}, message ...string) {
 		if !val {
 			v.Append(key, msg)
 		}
-	case mail.Address:
-		if val.Address == "" {
-			v.Append(key, msg)
-		}
+
 	case []int64:
 		if len(val) == 0 {
 			v.Append(key, msg)
@@ -67,12 +70,26 @@ func (v *Validator) Required(key string, value interface{}, message ...string) {
 				break
 			}
 		}
-
 		if !nonEmpty {
 			v.Append(key, msg)
 		}
-	default:
-		panic(fmt.Sprintf("zvalidate: not a supported type: %T", value))
+
+	case mail.Address:
+		if val.Address == "" {
+			v.Append(key, msg)
+		}
+	case *mail.Address:
+		if val == nil || val.Address == "" {
+			v.Append(key, msg)
+		}
+	case time.Time:
+		if val.IsZero() {
+			v.Append(key, msg)
+		}
+	case *time.Time:
+		if val == nil || val.IsZero() {
+			v.Append(key, msg)
+		}
 	}
 }
 
@@ -84,7 +101,7 @@ func (v *Validator) Exclude(key, value string, exclude []string, message ...stri
 
 	value = strings.TrimSpace(strings.ToLower(value))
 	for _, e := range exclude {
-		if strings.ToLower(e) == value {
+		if strings.EqualFold(e, value) {
 			if msg != "" {
 				v.Append(key, msg)
 			} else {
@@ -118,7 +135,29 @@ func (v *Validator) Include(key, value string, include []string, message ...stri
 	}
 }
 
-// Domain validates that the domain is valid.
+// Range sets the minimum and maximum value of a integer.
+//
+// A maximum of 0 indicates there is no upper limit.
+func (v *Validator) Range(key string, value, min, max int64, message ...string) {
+	msg := getMessage(message, "")
+
+	if value < min {
+		if msg != "" {
+			v.Append(key, msg)
+		} else {
+			v.Append(key, fmt.Sprintf(MessageRangeHigher, min))
+		}
+	}
+	if max > 0 && value > max {
+		if msg != "" {
+			v.Append(key, msg)
+		} else {
+			v.Append(key, fmt.Sprintf(MessageRangeLower, max))
+		}
+	}
+}
+
+// Domain parses a domain as individual labels.
 //
 // A domain must consist of at least two labels. So "com" or "localhost" – while
 // technically valid domain names – are not accepted, whereas "example.com" or
@@ -127,8 +166,6 @@ func (v *Validator) Include(key, value string, include []string, message ...stri
 //
 // This works for internationalized domain names (IDN), either as UTF-8
 // characters or as punycode.
-//
-// Returns the list of labels.
 func (v *Validator) Domain(key, value string, message ...string) []string {
 	if value == "" {
 		return nil
@@ -184,14 +221,13 @@ func validDomain(value string) []string {
 	return labels
 }
 
-// URL validates that the string contains a valid URL.
+// URL parses an URL.
 //
 // The URL may consist of a scheme, host, path, and query parameters. Only the
 // host is required.
 //
-// The host is validated with the Domain() validation.
-//
-// If the scheme is not given "http" will be prepended.
+// The host is validated with the Domain() validation. If the scheme is not
+// given "http" will be prepended.
 func (v *Validator) URL(key, value string, message ...string) *url.URL {
 	if value == "" {
 		return nil
@@ -236,7 +272,7 @@ func (v *Validator) URL(key, value string, message ...string) *url.URL {
 	return u
 }
 
-// Email validates if this email looks like a valid email address.
+// Email parses an email address.
 func (v *Validator) Email(key, value string, message ...string) mail.Address {
 	if value == "" {
 		return mail.Address{}
@@ -259,7 +295,7 @@ func (v *Validator) Email(key, value string, message ...string) mail.Address {
 	return *addr
 }
 
-// IPv4 validates that a string is a valid IPv4 address.
+// IPv4 parses an IPv4 address.
 func (v *Validator) IPv4(key, value string, message ...string) net.IP {
 	if value == "" {
 		return net.IP{}
@@ -273,7 +309,7 @@ func (v *Validator) IPv4(key, value string, message ...string) net.IP {
 	return ip
 }
 
-// IP validates that a string is a valid IPv4 or IPv6 address.
+// IP parses an IPv4 or IPv6 address.
 func (v *Validator) IP(key, value string, message ...string) net.IP {
 	if value == "" {
 		return net.IP{}
@@ -287,8 +323,7 @@ func (v *Validator) IP(key, value string, message ...string) net.IP {
 	return ip
 }
 
-// HexColor validates if the string looks like a color as a hex triplet (e.g.
-// #ffffff or #fff).
+// HexColor parses a color as a hex triplet (e.g. #ffffff or #fff).
 func (v *Validator) HexColor(key, value string, message ...string) (uint8, uint8, uint8) {
 	if value == "" {
 		return 0, 0, 0
@@ -318,7 +353,7 @@ func (v *Validator) HexColor(key, value string, message ...string) (uint8, uint8
 	return rgb[0], rgb[1], rgb[2]
 }
 
-// Len validates the character length of a string.
+// Len validates the character (rune) length of a string.
 //
 // A maximum of 0 indicates there is no upper limit.
 func (v *Validator) Len(key, value string, min, max int, message ...string) int {
@@ -342,7 +377,7 @@ func (v *Validator) Len(key, value string, min, max int, message ...string) int 
 	return l
 }
 
-// Integer checks if this looks like an integer (i.e. a whole number).
+// Integer parses a string as an integer.
 func (v *Validator) Integer(key, value string, message ...string) int64 {
 	if value == "" {
 		return 0
@@ -355,7 +390,7 @@ func (v *Validator) Integer(key, value string, message ...string) int64 {
 	return i
 }
 
-// Boolean checks if this looks like a boolean value.
+// Boolean parses as string as a boolean.
 func (v *Validator) Boolean(key, value string, message ...string) bool {
 	if value == "" {
 		return false
@@ -371,7 +406,7 @@ func (v *Validator) Boolean(key, value string, message ...string) bool {
 	return false
 }
 
-// Date checks if the string looks like a date in the given layout.
+// Date parses a string in the given date layout.
 func (v *Validator) Date(key, value, layout string, message ...string) time.Time {
 	msg := getMessage(message, "")
 	t, err := time.Parse(layout, value)
@@ -387,7 +422,7 @@ func (v *Validator) Date(key, value, layout string, message ...string) time.Time
 
 var rePhone = regexp.MustCompile(`^[0123456789+\-() .]{5,20}$`)
 
-// Phone checks if the string looks like a valid phone number.
+// Phone parses a phone number.
 //
 // There are a great amount of writing conventions for phone numbers:
 // https://en.wikipedia.org/wiki/National_conventions_for_writing_telephone_numbers
@@ -408,26 +443,4 @@ func (v *Validator) Phone(key, value string, message ...string) string {
 
 	return strings.NewReplacer("-", "", "(", "", ")", "", " ", "", ".", "").
 		Replace(value)
-}
-
-// Range sets the minimum and maximum value of a integer.
-//
-// A maximum of 0 indicates there is no upper limit.
-func (v *Validator) Range(key string, value, min, max int64, message ...string) {
-	msg := getMessage(message, "")
-
-	if value < min {
-		if msg != "" {
-			v.Append(key, msg)
-		} else {
-			v.Append(key, fmt.Sprintf(MessageRangeHigher, min))
-		}
-	}
-	if max > 0 && value > max {
-		if msg != "" {
-			v.Append(key, msg)
-		} else {
-			v.Append(key, fmt.Sprintf(MessageRangeLower, max))
-		}
-	}
 }
