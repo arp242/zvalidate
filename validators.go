@@ -408,6 +408,10 @@ func (v *Validator) Boolean(key, value string, message ...string) bool {
 
 // Date parses a string in the given date layout.
 func (v *Validator) Date(key, value, layout string, message ...string) time.Time {
+	if value == "" {
+		return time.Time{}
+	}
+
 	msg := getMessage(message, "")
 	t, err := time.Parse(layout, value)
 	if err != nil {

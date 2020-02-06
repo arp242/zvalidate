@@ -381,6 +381,10 @@ func TestValidators(t *testing.T) {
 
 		// Date
 		{
+			func(v Validator) { v.Date("k", "", time.RFC3339) },
+			make(map[string][]string),
+		},
+		{
 			func(v Validator) { v.Date("k", "2017-11-14T13:37:00Z", time.RFC3339) },
 			make(map[string][]string),
 		},
