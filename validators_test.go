@@ -540,6 +540,24 @@ func TestValidators(t *testing.T) {
 			func(v Validator) { v.Range("v", 4, 16, 32) },
 			map[string][]string{"v": {"must be higher than 16"}},
 		},
+
+		// UTF8
+		{
+			func(v Validator) { v.UTF8("v", "") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.UTF8("v", "h€y") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.UTF8("v", "h€y\x00a") },
+			map[string][]string{"v": {"must be UTF-8"}},
+		},
+		{
+			func(v Validator) { v.UTF8("v", "h\xc0\xaeya") },
+			map[string][]string{"v": {"must be UTF-8"}},
+		},
 	}
 
 	for i, tt := range tests {

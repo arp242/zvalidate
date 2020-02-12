@@ -353,6 +353,20 @@ func (v *Validator) HexColor(key, value string, message ...string) (uint8, uint8
 	return rgb[0], rgb[1], rgb[2]
 }
 
+// UTF8 validates that this string is valid UTF-8.
+//
+// Caveat: this will consider NULL bytes *invalid* even though they're valid in
+// UTF-8. Many tools don't accept it (e.g. PostgreSQL and SQLite), there's very
+// rarely a reason to include them in strings, and most uses I've seen is from
+// people trying to insert exploits. So the practical thing to do is just to
+// reject it.
+func (v *Validator) UTF8(key, value string, message ...string) {
+	msg := getMessage(message, MessageUTF8)
+	if !validString(value) {
+		v.Append(key, msg)
+	}
+}
+
 // Len validates the character (rune) length of a string.
 //
 // A maximum of 0 indicates there is no upper limit.

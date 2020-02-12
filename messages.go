@@ -19,6 +19,7 @@ var (
 	MessagePhone       = "must be a valid phone number"
 	MessageRangeHigher = "must be higher than %d"
 	MessageRangeLower  = "must be lower than %d"
+	MessageUTF8        = "must be UTF-8"
 )
 
 func getMessage(in []string, def string) string {
