@@ -2,4 +2,4 @@ module zgo.at/zvalidate
 
 go 1.13
 
-require github.com/google/go-cmp v0.3.1
+require zgo.at/ztest v0.0.0-20200316134318-cfad86d80b41

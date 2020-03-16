@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
+	"zgo.at/ztest"
 )
 
 func TestMerge(t *testing.T) {
@@ -95,7 +95,7 @@ func TestSub(t *testing.T) {
 		ls1.Sub("lsub2", "holiday", ls2)
 		v.Sub("lsub1", "", ls1)
 
-		want := map[string][]string{
+		want := fmt.Sprintf("%+v", map[string][]string{
 			"lsub1.lsub2[holiday].err": []string{"very sub"},
 			"sub1.sub2.err":            []string{"very sub"},
 			"name":                     []string{"must be set"},
@@ -105,9 +105,9 @@ func TestSub(t *testing.T) {
 			"addresses[office].city":   []string{"must be set"},
 			"other":                    []string{"oh noes"},
 			"emails[office]":           []string{"not an email"},
-		}
+		})
 
-		if d := cmp.Diff(v.Errors, want); d != "" {
+		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), want); d != "" {
 			t.Errorf("(-got +want)\n:%s", d)
 		}
 	})
@@ -231,8 +231,8 @@ func TestPop(t *testing.T) {
 			t.Errorf("wrong return\nout:  %#v\nwant: %#v", out, want)
 		}
 
-		wantErr := map[string][]string{"a": {"err", "err2"}, "b": {"err3"}}
-		if d := cmp.Diff(v.Errors, wantErr); d != "" {
+		wantErr := fmt.Sprintf("%+v", map[string][]string{"a": {"err", "err2"}, "b": {"err3"}})
+		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), wantErr); d != "" {
 			t.Errorf("(-got +want)\n:%s", d)
 		}
 	}
@@ -244,8 +244,8 @@ func TestPop(t *testing.T) {
 			t.Errorf("wrong return\nout:  %#v\nwant: <nil>", out)
 		}
 
-		wantErr := map[string][]string{"b": {"err3"}}
-		if d := cmp.Diff(v.Errors, wantErr); d != "" {
+		wantErr := fmt.Sprintf("%+v", map[string][]string{"b": {"err3"}})
+		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), wantErr); d != "" {
 			t.Errorf("(-got +want)\n:%s", d)
 		}
 	}
@@ -257,8 +257,8 @@ func TestPop(t *testing.T) {
 			t.Errorf("wrong return\nout:  %#v\nwant: <nil>", out)
 		}
 
-		wantErr := map[string][]string{"b": {"err3"}}
-		if d := cmp.Diff(v.Errors, wantErr); d != "" {
+		wantErr := fmt.Sprintf("%+v", map[string][]string{"b": {"err3"}})
+		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), wantErr); d != "" {
 			t.Errorf("(-got +want)\n:%s", d)
 		}
 	}
@@ -270,8 +270,8 @@ func TestPop(t *testing.T) {
 			t.Errorf("wrong return\nout:  %#v\nwant: <nil>", out)
 		}
 
-		wantErr := map[string][]string{}
-		if d := cmp.Diff(v.Errors, wantErr); d != "" {
+		wantErr := fmt.Sprintf("%+v", map[string][]string{})
+		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), wantErr); d != "" {
 			t.Errorf("(-got +want)\n:%s", d)
 		}
 	}
