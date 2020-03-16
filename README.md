@@ -39,7 +39,7 @@ All validators are just method calls on the `Validator` struct, and follow the
 same patterns:
 
 - The input's zero type (empty string, 0, nil, etc.) is valid. Use the
-  `Required()` validator if you want to make a parameter required).
+  `Required()` validator if you want to make a parameter required.
 
 - `key string, value [..]` are the first two arguments, where `key` is the
   parameter name (to display in the error or next to a form) and `value` is what
@@ -181,10 +181,10 @@ input element, instead of a list in a flash message (but you can do either).
   ```
 
 
-**caveat**: if there is an error with a corresponding form element then that
-won't be displayed. This is why the above examples `Pop()` all the errors they
-want to display, and then display anything that's left. This prevents "hidden"
-errors.
+**caveat**: if there is an error without a corresponding form element then that
+error won't be displayed. This is why the above examples `Pop()` all the errors
+they want to display, and then display anything that's left at the end. This
+prevents "hidden" errors.
 
 i18n
 ----
