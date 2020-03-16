@@ -4,7 +4,7 @@
 
 // This contains a copy of utf.ValidString() which also considers NULL bytes
 // invalid.
-//
+
 package zvalidate
 
 const (
