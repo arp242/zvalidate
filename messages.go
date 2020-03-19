@@ -4,6 +4,7 @@ package zvalidate
 var (
 	MessageRequired    = "must be set"
 	MessageDomain      = "must be a valid domain"
+	MessageHostname    = "must be a valid hostname"
 	MessageURL         = "must be a valid url"
 	MessageEmail       = "must be a valid email address"
 	MessageIPv4        = "must be a valid IPv4 address"

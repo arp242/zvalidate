@@ -334,15 +334,15 @@ func TestValidators(t *testing.T) {
 
 		{
 			func(v Validator) { v.Hostname("v", "example.com:-)") },
-			map[string][]string{"v": {"must be a valid domain: invalid character: ':'"}},
+			map[string][]string{"v": {"must be a valid hostname: invalid character: ':'"}},
 		},
 		{
 			func(v Validator) { v.Hostname("v", "ex ample.com") },
-			map[string][]string{"v": {"must be a valid domain: invalid character: ' '"}},
+			map[string][]string{"v": {"must be a valid hostname: invalid character: ' '"}},
 		},
 		{
 			func(v Validator) { v.Hostname("v", strings.Repeat("a", 64)) },
-			map[string][]string{"v": {"must be a valid domain: label is longer than 63 bytes"}},
+			map[string][]string{"v": {"must be a valid hostname: label is longer than 63 bytes"}},
 		},
 
 		// URL

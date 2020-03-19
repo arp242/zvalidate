@@ -191,7 +191,7 @@ func (v *Validator) Hostname(key, value string, message ...string) []string {
 		return nil
 	}
 
-	msg := getMessage(message, MessageDomain)
+	msg := getMessage(message, MessageHostname)
 	labels, err := validDomain(value, 1)
 	if err != nil {
 		v.Append(key, fmt.Sprintf("%s: %s", msg, err))
