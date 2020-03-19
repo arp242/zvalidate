@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/mail"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -286,19 +287,62 @@ func TestValidators(t *testing.T) {
 
 		{
 			func(v Validator) { v.Domain("v", "one-label") },
-			map[string][]string{"v": {"must be a valid domain"}},
+			map[string][]string{"v": {"must be a valid domain: need at least 2 labels"}},
 		},
 		{
 			func(v Validator) { v.Domain("v", "one-label", "foo") },
-			map[string][]string{"v": {"foo"}},
+			map[string][]string{"v": {"foo: need at least 2 labels"}},
 		},
 		{
 			func(v Validator) { v.Domain("v", "example.com:-)") },
-			map[string][]string{"v": {"must be a valid domain"}},
+			map[string][]string{"v": {"must be a valid domain: invalid character: ':'"}},
 		},
 		{
 			func(v Validator) { v.Domain("v", "ex ample.com") },
-			map[string][]string{"v": {"must be a valid domain"}},
+			map[string][]string{"v": {"must be a valid domain: invalid character: ' '"}},
+		},
+
+		// Hostname
+		{
+			func(v Validator) { v.Hostname("v", "") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Hostname("v", "example.com") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Hostname("v", "example.com.test.asd") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Hostname("v", "example-test.com") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Hostname("v", "ﻢﻔﺗﻮﺣ.ﺬﺑﺎﺑﺓ") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Hostname("v", "xn--pgbg2dpr.xn--mgbbbe5a") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Hostname("v", "one-label") },
+			make(map[string][]string),
+		},
+
+		{
+			func(v Validator) { v.Hostname("v", "example.com:-)") },
+			map[string][]string{"v": {"must be a valid domain: invalid character: ':'"}},
+		},
+		{
+			func(v Validator) { v.Hostname("v", "ex ample.com") },
+			map[string][]string{"v": {"must be a valid domain: invalid character: ' '"}},
+		},
+		{
+			func(v Validator) { v.Hostname("v", strings.Repeat("a", 64)) },
+			map[string][]string{"v": {"must be a valid domain: label is longer than 63 bytes"}},
 		},
 
 		// URL

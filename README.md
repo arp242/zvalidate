@@ -60,23 +60,25 @@ Validations
 List of validations with abbreviated function signature (`key string, value
 [..]` omitted):
 
-| Function                         | Description                                 |
-| --------                         | -----------                                 |
-| Required()                       | Value must not be the type's zero value     |
-| Exclude([]string)                | Value is not in the exclude list            |
-| Include([]string)                | Value is in the include list                |
-| Range(min, max int)              | Minimum and maximum int value.              |
-| Len(min, max int) int            | Character length of string                  |
-| Integer() int64                  | Integer value                               |
-| Boolean() bool                   | Boolean value                               |
-| Domain() []string                | Domain name; returns list of domain labels. |
-| URL() \*url.URL                  | Valid URL                                   |
-| Email() mail.Address             | Email address                               |
-| IPv4() net.IP                    | IPv4 address                                |
-| IP() net.IP                      | IPv4 or IPv6 address                        |
-| HexColor() (uint8, uint8, uint8) | Colour as hex triplet (#123456 or #123)     |
-| Date(layout string)              | Parse according to the given layout         |
-| Phone() string                   | Looks like a phone number                   |
+| Function                         | Description                                |
+| --------                         | -----------                                |
+| Required()                       | Value must not be the type's zero value    |
+| Exclude([]string)                | Value is not in the exclude list           |
+| Include([]string)                | Value is in the include list               |
+| Range(min, max int)              | Minimum and maximum int value.             |
+| Len(min, max int) int            | Character length of string                 |
+| Integer() int64                  | Integer value                              |
+| Boolean() bool                   | Boolean value                              |
+| Domain() []string                | Domain name; returns list of domain labels |
+| Hostname() []string              | Any hostname                               |
+| URL() \*url.URL                  | Valid URL                                  |
+| Email() mail.Address             | Email address                              |
+| IPv4() net.IP                    | IPv4 address                               |
+| IP() net.IP                      | IPv4 or IPv6 address                       |
+| HexColor() (uint8, uint8, uint8) | Colour as hex triplet (#123456 or #123)    |
+| Date(layout string)              | Parse according to the given layout        |
+| Phone() string                   | Looks like a phone number                  |
+| UTF8()                           | String is valid UTF-8                      |
 
 You can set your own errors with v.Append():
 

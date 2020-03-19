@@ -1,6 +1,7 @@
 package zvalidate
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/mail"
@@ -172,53 +173,78 @@ func (v *Validator) Domain(key, value string, message ...string) []string {
 	}
 
 	msg := getMessage(message, MessageDomain)
-	labels := validDomain(value)
-	if labels == nil {
-		v.Append(key, msg)
+	labels, err := validDomain(value, 2)
+	if err != nil {
+		v.Append(key, fmt.Sprintf("%s: %s", msg, err))
 	}
 	return labels
 }
 
-func validDomain(value string) []string {
-	if len(value) < 3 || value[0] == '.' {
+// Hostname checks if this is a valid hostname.
+//
+// This is different from Domain in that it considers any hostname valid,
+// whereas Domain() is a bit stricter and validates if this is likely to be a
+// publicly accessible domain. e.g. "localhost" is valid in Hostname(), but not
+// Domain().
+func (v *Validator) Hostname(key, value string, message ...string) []string {
+	if value == "" {
 		return nil
+	}
+
+	msg := getMessage(message, MessageDomain)
+	labels, err := validDomain(value, 1)
+	if err != nil {
+		v.Append(key, fmt.Sprintf("%s: %s", msg, err))
+	}
+	return labels
+}
+
+func validDomain(value string, minLabels int) ([]string, error) {
+	if len(value) < 3 || value[0] == '.' {
+		return nil, fmt.Errorf("too short")
 	}
 	if value[len(value)-1] == '.' {
 		value = value[:len(value)-1]
 	}
 
 	labels := strings.Split(value, ".")
-	if len(labels) < 2 {
-		return nil
+	if len(labels) < minLabels {
+		return nil, fmt.Errorf("need at least %d labels", minLabels)
 	}
 
+	var total int
 	for i, l := range labels {
 		// See RFC 1034, section 3.1, RFC 1035, secion 2.3.1
 		//
 		// - Only allow letters, numbers
-		// - Max size of a single label is 63 characters
+		// - Max size of a single label is 63 bytes
 		// - Need at least two labels
 		if len(l) > 63 {
-			return nil
+			return nil, errors.New("label is longer than 63 bytes")
 		}
+		total += len(l)
 
 		if strings.HasPrefix(l, "xn--") {
 			var err error
 			l, err = punyDecode(l[4:])
 			if err != nil {
-				return nil
+				return nil, fmt.Errorf("not valid punycode: %q", l)
 			}
 			labels[i] = l
 		}
 
 		for _, c := range l {
 			if !unicode.IsLetter(c) && !unicode.IsDigit(c) && c != '-' {
-				return nil
+				return nil, fmt.Errorf("invalid character: %q", c)
 			}
 		}
 	}
 
-	return labels
+	if total > 255 {
+		return nil, fmt.Errorf("domain is longer than 255 bytes")
+	}
+
+	return labels, nil
 }
 
 // URL parses an URL.
@@ -264,7 +290,8 @@ func (v *Validator) URL(key, value string, message ...string) *url.URL {
 		host = h
 	}
 
-	if len(validDomain(host)) == 0 {
+	_, err = validDomain(host, 2)
+	if err != nil {
 		v.Append(key, msg)
 		return nil
 	}
@@ -286,8 +313,8 @@ func (v *Validator) Email(key, value string, message ...string) mail.Address {
 	}
 
 	// "foo@domain" is technically valid, but practically never what's intended.
-	domain := addr.Address[strings.LastIndex(addr.Address, "@")+1:]
-	if !strings.ContainsRune(domain, '.') {
+	_, err = validDomain(addr.Address[strings.LastIndex(addr.Address, "@")+1:], 2)
+	if err != nil {
 		v.Append(key, msg)
 		return mail.Address{}
 	}
