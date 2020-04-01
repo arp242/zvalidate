@@ -80,7 +80,7 @@ List of validations with abbreviated function signature (`key string, value
 | Phone() string                   | Looks like a phone number                  |
 | UTF8()                           | String is valid UTF-8                      |
 
-You can set your own errors with v.Append():
+You can set your own errors with `v.Append()`:
 
 ```go
 if !some_complex_condition {
@@ -92,9 +92,7 @@ Nested validations
 ------------------
 
 `Sub()` allows adding nested subvalidations; this is useful if a form creates
-more than one object.
-
-For example:
+more than one object. For example:
 
 ```go
 v := zvalidate.New()
@@ -115,13 +113,18 @@ for i, a := range customer.Addresses {
 This will be added as `addresses[0].city`, `addresses[1].city`, etc.
 
 If the error is not a `Validator` then the `Error()` text will be added as just
-the key name without subkey (same as `v.Append("key", "msg")`); this is mostly
-to support cases like:
+the key name without subkey, as if you called `v.Append("key", "msg")`. This is
+mostly to support cases like:
 
 ```go
 func (Customer c) Validate() {
     v := validate.New()
+    v.Email("email", c.Email)
+    if v.HasErrors() {
+        return v
+    }
 
+    // Check if this email already exists in the DB, may return various errors.
     ok, err := c.isUniqueEmail(c.Email)
     if err != nil {
         return err

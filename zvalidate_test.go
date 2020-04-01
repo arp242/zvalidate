@@ -108,7 +108,7 @@ func TestSub(t *testing.T) {
 		})
 
 		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), want); d != "" {
-			t.Errorf("(-got +want)\n:%s", d)
+			t.Errorf(d)
 		}
 	})
 }
@@ -233,7 +233,7 @@ func TestPop(t *testing.T) {
 
 		wantErr := fmt.Sprintf("%+v", map[string][]string{"a": {"err", "err2"}, "b": {"err3"}})
 		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), wantErr); d != "" {
-			t.Errorf("(-got +want)\n:%s", d)
+			t.Errorf(d)
 		}
 	}
 
@@ -246,7 +246,7 @@ func TestPop(t *testing.T) {
 
 		wantErr := fmt.Sprintf("%+v", map[string][]string{"b": {"err3"}})
 		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), wantErr); d != "" {
-			t.Errorf("(-got +want)\n:%s", d)
+			t.Errorf(d)
 		}
 	}
 
@@ -259,7 +259,7 @@ func TestPop(t *testing.T) {
 
 		wantErr := fmt.Sprintf("%+v", map[string][]string{"b": {"err3"}})
 		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), wantErr); d != "" {
-			t.Errorf("(-got +want)\n:%s", d)
+			t.Errorf(d)
 		}
 	}
 
@@ -272,7 +272,7 @@ func TestPop(t *testing.T) {
 
 		wantErr := fmt.Sprintf("%+v", map[string][]string{})
 		if d := ztest.Diff(fmt.Sprintf("%+v", v.Errors), wantErr); d != "" {
-			t.Errorf("(-got +want)\n:%s", d)
+			t.Errorf(d)
 		}
 	}
 
