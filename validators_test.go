@@ -112,6 +112,25 @@ func TestValidators(t *testing.T) {
 			make(map[string][]string),
 		},
 
+		{
+			func(v Validator) { v.Required("k", nil) },
+			map[string][]string{"k": {"must be set"}},
+		},
+		{
+			func(v Validator) {
+				s := ""
+				v.Required("k", &s)
+			},
+			map[string][]string{"k": {"must be set"}},
+		},
+		{
+			func(v Validator) {
+				i := 0
+				v.Required("k", &i)
+			},
+			map[string][]string{"k": {"must be set"}},
+		},
+
 		// Required mailaddress
 		{
 			func(v Validator) { v.Required("k1", mail.Address{}) },

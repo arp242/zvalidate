@@ -21,6 +21,12 @@ import (
 func (v *Validator) Required(key string, value interface{}, message ...string) {
 	msg := getMessage(message, MessageRequired)
 
+	if value == nil {
+		v.Append(key, msg)
+		return
+	}
+
+check:
 	switch val := value.(type) {
 	default:
 		// This is an appropiate use of panic, as it's a programming error that
@@ -79,18 +85,32 @@ func (v *Validator) Required(key string, value interface{}, message ...string) {
 		if val.Address == "" {
 			v.Append(key, msg)
 		}
-	case *mail.Address:
-		if val == nil || val.Address == "" {
-			v.Append(key, msg)
-		}
 	case time.Time:
 		if val.IsZero() {
 			v.Append(key, msg)
 		}
+
+	case *string:
+		value = *val
+		goto check
+	case *int:
+		value = *val
+		goto check
+	case *int64:
+		value = *val
+		goto check
+	case *uint:
+		value = *val
+		goto check
+	case *uint64:
+		value = *val
+		goto check
+	case *mail.Address:
+		value = *val
+		goto check
 	case *time.Time:
-		if val == nil || val.IsZero() {
-			v.Append(key, msg)
-		}
+		value = *val
+		goto check
 	}
 }
 
