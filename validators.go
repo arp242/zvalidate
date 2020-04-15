@@ -26,6 +26,28 @@ func (v *Validator) Required(key string, value interface{}, message ...string) {
 		return
 	}
 
+	var isnil bool
+	switch val := value.(type) {
+	case *string:
+		isnil = val == nil
+	case *int:
+		isnil = val == nil
+	case *int64:
+		isnil = val == nil
+	case *uint:
+		isnil = val == nil
+	case *uint64:
+		isnil = val == nil
+	case *mail.Address:
+		isnil = val == nil
+	case *time.Time:
+		isnil = val == nil
+	}
+	if isnil {
+		v.Append(key, msg)
+		return
+	}
+
 check:
 	switch val := value.(type) {
 	default:
