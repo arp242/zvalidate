@@ -111,6 +111,26 @@ func TestValidators(t *testing.T) {
 			func(v Validator) { v.Required("k", []string{"", "", " "}) },
 			make(map[string][]string),
 		},
+		{
+			func(v Validator) { v.Required("k", []byte("X")) },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Required("k", []byte("")) },
+			map[string][]string{"k": {"must be set"}},
+		},
+		{
+			func(v Validator) { v.Required("k", []byte{}) },
+			map[string][]string{"k": {"must be set"}},
+		},
+		{
+			func(v Validator) { v.Required("k", []byte{0}) },
+			map[string][]string{"k": {"must be set"}},
+		},
+		{
+			func(v Validator) { v.Required("k", []byte{0, 1}) },
+			make(map[string][]string),
+		},
 
 		{
 			func(v Validator) { v.Required("k", nil) },

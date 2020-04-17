@@ -81,6 +81,23 @@ check:
 			v.Append(key, msg)
 		}
 
+	case []byte:
+		if len(val) == 0 {
+			v.Append(key, msg)
+			return
+		}
+
+		// Make sure there is at least one non-empty entry.
+		nonEmpty := false
+		for i := range val {
+			if val[i] != 0 {
+				nonEmpty = true
+				break
+			}
+		}
+		if !nonEmpty {
+			v.Append(key, msg)
+		}
 	case []int64:
 		if len(val) == 0 {
 			v.Append(key, msg)
