@@ -497,9 +497,9 @@ func (v *Validator) Boolean(key, value string, message ...string) bool {
 	}
 
 	switch strings.ToLower(value) {
-	case "1", "y", "yes", "t", "true":
+	case "1", "y", "yes", "t", "true", "on":
 		return true
-	case "0", "n", "no", "f", "false":
+	case "0", "n", "no", "f", "false", "off":
 		return false
 	}
 	v.Append(key, getMessage(message, MessageBool))

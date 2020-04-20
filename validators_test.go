@@ -754,8 +754,8 @@ func TestBoolean(t *testing.T) {
 	}{
 		{
 			func(v Validator) bool { return v.Boolean("k", "on") },
-			false,
-			map[string][]string{"k": {"must be a boolean"}},
+			true,
+			make(map[string][]string),
 		},
 		{
 			func(v Validator) bool { return v.Boolean("k", "") },
