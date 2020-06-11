@@ -64,8 +64,8 @@ List of validations with abbreviated function signature (`key string, value
 | --------                         | -----------                                |
 | Required()                       | Value must not be the type's zero value    |
 | Exclude([]string)                | Value is not in the exclude list           |
-| Include([]string)                | Value is in the include list               |
-| Range(min, max int)              | Minimum and maximum int value.             |
+| Include([]string)                | Value must e in the include list           |
+| Range(min, max int)              | Minimum and maximum int value              |
 | Len(min, max int) int            | Character length of string                 |
 | Integer() int64                  | Integer value                              |
 | Boolean() bool                   | Boolean value                              |

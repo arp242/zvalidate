@@ -152,7 +152,12 @@ func (v *Validator) String() string {
 
 	var b strings.Builder
 	for _, k := range keys {
-		b.WriteString(fmt.Sprintf("%s: %s.\n", k, strings.Join(v.Errors[k], ", ")))
+		if k != "" {
+			b.WriteString(k)
+			b.WriteString(": ")
+		}
+		b.WriteString(strings.Join(v.Errors[k], ", "))
+		b.WriteString(".\n")
 	}
 	return b.String()
 }
@@ -175,9 +180,11 @@ func (v *Validator) HTML() template.HTML {
 	var b strings.Builder
 	b.WriteString("<ul class='zvalidate'>\n")
 	for _, k := range keys {
-		b.WriteString(fmt.Sprintf("<li><strong>%s</strong>: %s.</li>\n",
-			template.HTMLEscapeString(k),
-			template.HTMLEscapeString(strings.Join(v.Errors[k], ", "))))
+		b.WriteString("<li>")
+		if k != "" {
+			b.WriteString(fmt.Sprintf("<strong>%s</strong>: ", template.HTMLEscapeString(k)))
+		}
+		b.WriteString(fmt.Sprintf("%s.</li>\n", template.HTMLEscapeString(strings.Join(v.Errors[k], ", "))))
 	}
 
 	b.WriteString("</ul>\n")
