@@ -155,35 +155,39 @@ check:
 
 // Exclude validates that the value is not in the exclude list.
 //
-// This list is matched case-insensitive.
-func (v *Validator) Exclude(key, value string, exclude []string, message ...string) {
+// This list is matched case-insensitive; the returned value is the same as
+// value.
+func (v *Validator) Exclude(key, value string, exclude []string, message ...string) string {
 	msg := getMessage(message, "")
 
-	value = strings.TrimSpace(strings.ToLower(value))
+	val := strings.TrimSpace(strings.ToLower(value))
 	for _, e := range exclude {
-		if strings.EqualFold(e, value) {
+		if strings.EqualFold(e, val) {
 			if msg != "" {
 				v.Append(key, msg)
 			} else {
 				v.Append(key, fmt.Sprintf(MessageExclude, e))
 			}
-			return
+			return ""
 		}
 	}
+
+	return value
 }
 
 // Include validates that the value is in the include list.
 //
-// This list is matched case-insensitive.
-func (v *Validator) Include(key, value string, include []string, message ...string) {
+// This list is matched case-insensitive; the returned value matches the casing
+// in the include list.
+func (v *Validator) Include(key, value string, include []string, message ...string) string {
 	if len(include) == 0 {
-		return
+		return value
 	}
 
 	value = strings.TrimSpace(strings.ToLower(value))
 	for _, e := range include {
 		if strings.EqualFold(e, value) {
-			return
+			return e
 		}
 	}
 
@@ -193,6 +197,7 @@ func (v *Validator) Include(key, value string, include []string, message ...stri
 	} else {
 		v.Append(key, fmt.Sprintf(MessageInclude, strings.Join(include, ", ")))
 	}
+	return ""
 }
 
 // Range sets the minimum and maximum value of a integer.
