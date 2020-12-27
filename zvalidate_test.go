@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"zgo.at/ztest"
+	"zgo.at/zstd/ztest"
 )
 
 func TestMerge(t *testing.T) {
