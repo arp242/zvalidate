@@ -441,6 +441,11 @@ func TestValidators(t *testing.T) {
 		},
 
 		{
+			func(v Validator) { v.URLLocal("v", "http://localhost") },
+			make(map[string][]string),
+		},
+
+		{
 			func(v Validator) { v.URL("v", "one-label") },
 			map[string][]string{"v": {"must be a valid url"}},
 		},

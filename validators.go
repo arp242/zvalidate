@@ -316,9 +316,20 @@ func validDomain(value string, minLabels int) ([]string, error) {
 // The URL may consist of a scheme, host, path, and query parameters. Only the
 // host is required.
 //
-// The host is validated with the Domain() validation. If the scheme is not
-// given "http" will be prepended.
+// Local URLs are not considered valid; the host needs to have at least two
+// labels. Use URLLocal() if you also want to accept e.g "http://localhost".
+//
+// If the scheme is not given "http" will be prepended.
 func (v *Validator) URL(key, value string, message ...string) *url.URL {
+	return v.url(key, value, false, message...)
+}
+
+// URLLocal is like URL, but also considers local URLs to be valid.
+func (v *Validator) URLLocal(key, value string, message ...string) *url.URL {
+	return v.url(key, value, true, message...)
+}
+
+func (v *Validator) url(key, value string, local bool, message ...string) *url.URL {
 	if value == "" {
 		return nil
 	}
@@ -354,7 +365,7 @@ func (v *Validator) URL(key, value string, message ...string) *url.URL {
 		host = h
 	}
 
-	_, err = validDomain(host, 2)
+	_, err = validDomain(host, map[bool]int{true: 1, false: 2}[local])
 	if err != nil {
 		v.Append(key, msg)
 		return nil
