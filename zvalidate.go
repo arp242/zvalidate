@@ -5,6 +5,7 @@ package zvalidate
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"sort"
@@ -23,11 +24,20 @@ func New() Validator {
 	return Validator{Errors: make(map[string][]string)}
 }
 
+// As tries to convert this error to a Validator, returning nil if it's not.
+func As(err error) *Validator {
+	v := new(Validator)
+	if errors.As(err, v) || errors.As(err, &v) {
+		return v
+	}
+	return nil
+}
+
 // Error interface.
 func (v Validator) Error() string { return v.String() }
 
 // Code returns the HTTP status code for the error. Satisfies the guru.coder
-// interface in github.com/teamwork/guru.
+// interface in zgo.at/guru.
 func (v Validator) Code() int { return 400 }
 
 // ErrorJSON for reporting errors as JSON.
@@ -90,15 +100,22 @@ func (v *Validator) ErrorOrNil() error {
 //
 // For example:
 //
+//   func (c Customer) validateSettings() error {
+//       v := zvalidate.New()
+//       v.Required("domain", c.Domain)
+//       v.Required("email", c.Email)
+//       return v.ErrorOrNil()
+//   }
+//
 //   v := zvalidate.New()
 //   v.Required("name", customer.Name)
 //
-//   // key: "settings.domain"
-//   v.Sub("settings", -1, customer.Settings.Validate())
+//   // Keys will be added as "settings.domain" and "settings.email".
+//   v.Sub("settings", "", customer.validateSettings())
 //
-//   // key: "addresses[1].city"
-//   for i, a := range customer.Addresses {
-//       a.Sub("addresses", i, c.Validate())
+//   // List as array; keys will be added as "addresses[0].city" etc.
+//   for i, addr := range customer.Addresses {
+//       v.Sub("addresses", i, addr.Validate())
 //   }
 func (v *Validator) Sub(key, subKey string, err error) {
 	if err == nil {

@@ -10,6 +10,40 @@ import (
 	"zgo.at/zstd/ztest"
 )
 
+func TestAs(t *testing.T) {
+	vErr := New()
+	vErr.Append("x", "y")
+	err := vErr.ErrorOrNil()
+
+	{ // Pointer
+		v := As(err)
+		if v == nil {
+			t.Fatal("v is nil")
+		}
+		want := fmt.Sprintf("%p, %[1]s", &vErr)
+		have := fmt.Sprintf("%p, %[1]s", v)
+		if have != want {
+			t.Errorf("\nhave: %q\nwant: %q\n", have, want)
+		}
+	}
+
+	{ // Non-pointer
+		v := As(err)
+		if v == nil {
+			t.Fatal("v is nil")
+		}
+		want := fmt.Sprintf("%s", vErr)
+		have := fmt.Sprintf("%s", v)
+		if have != want {
+			t.Errorf("\nhave: %q\nwant: %q\n", have, want)
+		}
+	}
+
+	if As(errors.New("X")) != nil {
+		t.Error("not nil")
+	}
+}
+
 func TestMerge(t *testing.T) {
 	tests := []struct {
 		a, b, want map[string][]string
