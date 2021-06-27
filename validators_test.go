@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode"
 )
 
 func TestRequiredInt(t *testing.T) {
@@ -677,6 +678,30 @@ func TestValidators(t *testing.T) {
 		{
 			func(v Validator) { v.UTF8("v", "h\xc0\xaeya") },
 			map[string][]string{"v": {"must be UTF-8"}},
+		},
+
+		// Contains
+		{
+			func(v Validator) { v.Contains("v", "€", []*unicode.RangeTable{ASCII}, nil) },
+			map[string][]string{"v": {"cannot contain the characters '€'"}},
+		},
+		{
+			func(v Validator) { v.Contains("v", "abc€def£", []*unicode.RangeTable{ASCII}, nil) },
+			map[string][]string{"v": {"cannot contain the characters '€', '£'"}},
+		},
+		{
+			func(v Validator) {
+				v.Contains("v", "abc€def£", []*unicode.RangeTable{ASCII}, nil, "no %s allowed; must be ASCII")
+			},
+			map[string][]string{"v": {"no '€', '£' allowed; must be ASCII"}},
+		},
+		{
+			func(v Validator) { v.Contains("v", "€", []*unicode.RangeTable{ASCII}, []rune{'€'}) },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Contains("v", "€", nil, []rune{'€'}) },
+			make(map[string][]string),
 		},
 	}
 

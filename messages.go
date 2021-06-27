@@ -21,6 +21,7 @@ var (
 	MessageRangeHigher = "must be %d or higher"
 	MessageRangeLower  = "must be %d or lower"
 	MessageUTF8        = "must be UTF-8"
+	MessageContains    = "cannot contain the characters %s"
 )
 
 func getMessage(in []string, def string) string {

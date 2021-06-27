@@ -469,6 +469,72 @@ func (v *Validator) UTF8(key, value string, message ...string) {
 	}
 }
 
+// Contains validates that this string only contains the given characters.
+//
+// This implies the UTF8() validation.
+//
+// The value is in either the unicode range or runes list. For example:
+//
+//    zvalidate.Contains("key", val, zvalidate.AlphaNumeric, []rune{'_', '-'})
+//
+// Will allow all ASCII letters and numbers and '_' and '-'.
+//
+// If you have a lot of values it's faster to create a custom RangeTable.
+//
+// Useful ranges:
+//
+//   zvalidate.AlphaNumeric    a-0A-Za-z
+//   zvalidate.ASCII           All ASCII characters except control characters.
+//   unicode.Letter            Any "letter" (in any script)
+//   unicode.Number            Any "number" (in any script)
+//   unicode.ASCII_Hex_Digit   0-9A-Fa-f
+func (v *Validator) Contains(key, value string, ranges []*unicode.RangeTable, runes []rune, message ...string) {
+	if !validString(value) {
+		v.Append(key, getMessage(message, MessageUTF8))
+	}
+
+	var invalid []rune
+	for _, r := range value {
+		if !unicode.In(r, ranges...) && !containsAnyRune(r, runes) {
+			invalid = append(invalid, r)
+		}
+	}
+	if len(invalid) > 0 {
+		// Would be nice to print allowed ranges, but this is a bit tricky to
+		// get right in all cases. Just rely on the user to pass a custom
+		// message.
+		cannot := make([]string, len(invalid))
+		for i := range invalid {
+			cannot[i] = fmt.Sprintf("%q", invalid[i])
+		}
+		v.Append(key, fmt.Sprintf(getMessage(message, MessageContains), strings.Join(cannot, ", ")))
+	}
+}
+
+// Range tables for Contains()
+//
+// TODO: move to zstd/zunicode?
+var (
+	AlphaNumeric = &unicode.RangeTable{
+		R16:         []unicode.Range16{{0x0030, 0x0039, 1}, {0x0041, 0x005a, 1}, {0x0061, 0x007a, 1}},
+		LatinOffset: 3,
+	}
+	ASCII = &unicode.RangeTable{
+		R16:         []unicode.Range16{{0x0020, 0x007e, 1}},
+		LatinOffset: 1,
+	}
+)
+
+// TODO: move to zstring
+func containsAnyRune(r rune, runes []rune) bool {
+	for _, r2 := range runes {
+		if r == r2 {
+			return true
+		}
+	}
+	return false
+}
+
 // Len validates the character (rune) length of a string.
 //
 // A maximum of 0 indicates there is no upper limit.

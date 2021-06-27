@@ -79,6 +79,7 @@ List of validations with abbreviated function signature (`key string, value
 | Date(layout string)              | Parse according to the given layout        |
 | Phone() string                   | Looks like a phone number                  |
 | UTF8()                           | String is valid UTF-8                      |
+| Contains([]\*unicode.RangeTable) | Only allow the given character ranges      |
 
 You can set your own errors with `v.Append()`:
 
