@@ -1,7 +1,3 @@
-[![Build Status](https://travis-ci.org/zgoat/zvalidate.svg?branch=master)](https://travis-ci.org/zgoat/zvalidate)
-[![codecov](https://codecov.io/gh/zgoat/zvalidate/branch/master/graph/badge.svg?token=n0k8YjbQOL)](https://codecov.io/gh/zgoat/zvalidate)
-[![GoDoc](https://godoc.org/zgo.at/zvalidate?status.svg)](https://pkg.go.dev/zgo.at/zvalidate)
-
 Simple validation for Go. Some things that make it different from the (many)
 other libraries:
 
@@ -16,6 +12,8 @@ other libraries:
 I originally wrote this at my previous employer
 ([github.com/teamwork/validate][tw]), this is an improved (and incompatible)
 version.
+
+API docs: https://godocs.io/zgo.at/zvalidate
 
 [tw]: https://github.com/teamwork/validate
 
