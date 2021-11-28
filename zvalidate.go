@@ -17,11 +17,77 @@ import (
 // Typically you shouldn't create this directly but use the New() function.
 type Validator struct {
 	Errors map[string][]string `json:"errors"`
+	msg    Messages
 }
 
 // New initializes a new Validator.
 func New() Validator {
-	return Validator{Errors: make(map[string][]string)}
+	return Validator{Errors: make(map[string][]string), msg: DefaultMessages}
+}
+
+// Messages sets the messages to use for validation errors.
+func (v *Validator) Messages(m Messages) {
+	if m.Required == nil {
+		m.Required = DefaultMessages.Required
+	}
+	if m.Domain == nil {
+		m.Domain = DefaultMessages.Domain
+	}
+	if m.Hostname == nil {
+		m.Hostname = DefaultMessages.Hostname
+	}
+	if m.URL == nil {
+		m.URL = DefaultMessages.URL
+	}
+	if m.Email == nil {
+		m.Email = DefaultMessages.Email
+	}
+	if m.IPv4 == nil {
+		m.IPv4 = DefaultMessages.IPv4
+	}
+	if m.IP == nil {
+		m.IP = DefaultMessages.IP
+	}
+	if m.HexColor == nil {
+		m.HexColor = DefaultMessages.HexColor
+	}
+	if m.LenLonger == nil {
+		m.LenLonger = DefaultMessages.LenLonger
+	}
+	if m.LenShorter == nil {
+		m.LenShorter = DefaultMessages.LenShorter
+	}
+	if m.Exclude == nil {
+		m.Exclude = DefaultMessages.Exclude
+	}
+	if m.Include == nil {
+		m.Include = DefaultMessages.Include
+	}
+	if m.Integer == nil {
+		m.Integer = DefaultMessages.Integer
+	}
+	if m.Bool == nil {
+		m.Bool = DefaultMessages.Bool
+	}
+	if m.Date == nil {
+		m.Date = DefaultMessages.Date
+	}
+	if m.Phone == nil {
+		m.Phone = DefaultMessages.Phone
+	}
+	if m.RangeHigher == nil {
+		m.RangeHigher = DefaultMessages.RangeHigher
+	}
+	if m.RangeLower == nil {
+		m.RangeLower = DefaultMessages.RangeLower
+	}
+	if m.UTF8 == nil {
+		m.UTF8 = DefaultMessages.UTF8
+	}
+	if m.Contains == nil {
+		m.Contains = DefaultMessages.Contains
+	}
+	v.msg = m
 }
 
 // As tries to convert this error to a Validator, returning nil if it's not.

@@ -153,21 +153,21 @@ func TestString(t *testing.T) {
 		want string
 	}{
 		{Validator{}, ""},
-		{Validator{map[string][]string{}}, ""},
+		{Validator{map[string][]string{}, DefaultMessages}, ""},
 
 		{Validator{map[string][]string{
 			"k": {"oh no"},
-		}}, "k: oh no.\n"},
+		}, DefaultMessages}, "k: oh no.\n"},
 		{Validator{map[string][]string{
 			"k": {"oh no", "more"},
-		}}, "k: oh no, more.\n"},
+		}, DefaultMessages}, "k: oh no, more.\n"},
 		{Validator{map[string][]string{
 			"k": {"oh no", "more", "even more"},
-		}}, "k: oh no, more, even more.\n"},
+		}, DefaultMessages}, "k: oh no, more, even more.\n"},
 		{Validator{map[string][]string{
 			"k":  {"oh no", "more", "even more"},
 			"k2": {"asd"},
-		}}, "k: oh no, more, even more.\nk2: asd.\n"},
+		}, DefaultMessages}, "k: oh no, more, even more.\nk2: asd.\n"},
 	}
 
 	for i, tt := range tests {
@@ -202,21 +202,21 @@ func TestHTML(t *testing.T) {
 		want template.HTML
 	}{
 		{Validator{}, ""},
-		{Validator{map[string][]string{}}, ""},
+		{Validator{map[string][]string{}, DefaultMessages}, ""},
 
 		{Validator{map[string][]string{
 			"k": {"oh no"},
-		}}, "<ul class='zvalidate'>\n<li><strong>k</strong>: oh no.</li>\n</ul>\n"},
+		}, DefaultMessages}, "<ul class='zvalidate'>\n<li><strong>k</strong>: oh no.</li>\n</ul>\n"},
 		{Validator{map[string][]string{
 			"k": {"oh no", "more"},
-		}}, "<ul class='zvalidate'>\n<li><strong>k</strong>: oh no, more.</li>\n</ul>\n"},
+		}, DefaultMessages}, "<ul class='zvalidate'>\n<li><strong>k</strong>: oh no, more.</li>\n</ul>\n"},
 		{Validator{map[string][]string{
 			"k": {"oh no", "more", "even more"},
-		}}, "<ul class='zvalidate'>\n<li><strong>k</strong>: oh no, more, even more.</li>\n</ul>\n"},
+		}, DefaultMessages}, "<ul class='zvalidate'>\n<li><strong>k</strong>: oh no, more, even more.</li>\n</ul>\n"},
 		{Validator{map[string][]string{
 			"k":  {"oh no", "more", "even more"},
 			"k2": {"asd"},
-		}}, "<ul class='zvalidate'>\n<li><strong>k</strong>: oh no, more, even more.</li>\n<li><strong>k2</strong>: asd.</li>\n</ul>\n"},
+		}, DefaultMessages}, "<ul class='zvalidate'>\n<li><strong>k</strong>: oh no, more, even more.</li>\n<li><strong>k2</strong>: asd.</li>\n</ul>\n"},
 	}
 
 	for i, tt := range tests {

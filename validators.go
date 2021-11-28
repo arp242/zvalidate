@@ -19,7 +19,7 @@ import (
 // Currently supported types are string, int, int64, uint, uint64, bool,
 // []string, and mail.Address. It will panic if the type is not supported.
 func (v *Validator) Required(key string, value interface{}, message ...string) {
-	msg := getMessage(message, MessageRequired)
+	msg := v.getMessage(message, v.msg.Required)
 
 	if value == nil {
 		v.Append(key, msg)
@@ -158,16 +158,10 @@ check:
 // This list is matched case-insensitive; the returned value is the same as
 // value.
 func (v *Validator) Exclude(key, value string, exclude []string, message ...string) string {
-	msg := getMessage(message, "")
-
 	val := strings.TrimSpace(strings.ToLower(value))
 	for _, e := range exclude {
 		if strings.EqualFold(e, val) {
-			if msg != "" {
-				v.Append(key, msg)
-			} else {
-				v.Append(key, fmt.Sprintf(MessageExclude, e))
-			}
+			v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.Exclude), e))
 			return ""
 		}
 	}
@@ -191,12 +185,7 @@ func (v *Validator) Include(key, value string, include []string, message ...stri
 		}
 	}
 
-	msg := getMessage(message, "")
-	if msg != "" {
-		v.Append(key, msg)
-	} else {
-		v.Append(key, fmt.Sprintf(MessageInclude, strings.Join(include, ", ")))
-	}
+	v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.Include), strings.Join(include, ", ")))
 	return ""
 }
 
@@ -204,21 +193,11 @@ func (v *Validator) Include(key, value string, include []string, message ...stri
 //
 // A maximum of 0 indicates there is no upper limit.
 func (v *Validator) Range(key string, value, min, max int64, message ...string) {
-	msg := getMessage(message, "")
-
 	if value < min {
-		if msg != "" {
-			v.Append(key, msg)
-		} else {
-			v.Append(key, fmt.Sprintf(MessageRangeHigher, min))
-		}
+		v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.RangeHigher), min))
 	}
 	if max > 0 && value > max {
-		if msg != "" {
-			v.Append(key, msg)
-		} else {
-			v.Append(key, fmt.Sprintf(MessageRangeLower, max))
-		}
+		v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.RangeLower), max))
 	}
 }
 
@@ -236,10 +215,9 @@ func (v *Validator) Domain(key, value string, message ...string) []string {
 		return nil
 	}
 
-	msg := getMessage(message, MessageDomain)
 	labels, err := validDomain(value, 2)
 	if err != nil {
-		v.Append(key, fmt.Sprintf("%s: %s", msg, err))
+		v.Append(key, fmt.Sprintf("%s: %s", v.getMessage(message, v.msg.Domain), err))
 	}
 	return labels
 }
@@ -255,10 +233,9 @@ func (v *Validator) Hostname(key, value string, message ...string) []string {
 		return nil
 	}
 
-	msg := getMessage(message, MessageHostname)
 	labels, err := validDomain(value, 1)
 	if err != nil {
-		v.Append(key, fmt.Sprintf("%s: %s", msg, err))
+		v.Append(key, fmt.Sprintf("%s: %s", v.getMessage(message, v.msg.Hostname), err))
 	}
 	return labels
 }
@@ -334,7 +311,7 @@ func (v *Validator) url(key, value string, local bool, message ...string) *url.U
 		return nil
 	}
 
-	msg := getMessage(message, MessageURL)
+	msg := v.getMessage(message, v.msg.URL)
 
 	u, err := url.Parse(value)
 	if err != nil && u == nil {
@@ -380,7 +357,7 @@ func (v *Validator) Email(key, value string, message ...string) mail.Address {
 		return mail.Address{}
 	}
 
-	msg := getMessage(message, MessageEmail)
+	msg := v.getMessage(message, v.msg.Email)
 	addr, err := mail.ParseAddress(value)
 	if err != nil {
 		v.Append(key, msg)
@@ -403,10 +380,9 @@ func (v *Validator) IPv4(key, value string, message ...string) net.IP {
 		return net.IP{}
 	}
 
-	msg := getMessage(message, MessageIPv4)
 	ip := net.ParseIP(value)
 	if ip == nil || ip.To4() == nil {
-		v.Append(key, msg)
+		v.Append(key, v.getMessage(message, v.msg.IPv4))
 	}
 	return ip
 }
@@ -417,10 +393,9 @@ func (v *Validator) IP(key, value string, message ...string) net.IP {
 		return net.IP{}
 	}
 
-	msg := getMessage(message, MessageIP)
 	ip := net.ParseIP(value)
 	if ip == nil {
-		v.Append(key, msg)
+		v.Append(key, v.getMessage(message, v.msg.IP))
 	}
 	return ip
 }
@@ -431,7 +406,7 @@ func (v *Validator) HexColor(key, value string, message ...string) (uint8, uint8
 		return 0, 0, 0
 	}
 
-	msg := getMessage(message, MessageHexColor)
+	msg := v.getMessage(message, v.msg.HexColor)
 
 	if value[0] != '#' {
 		v.Append(key, msg)
@@ -463,9 +438,8 @@ func (v *Validator) HexColor(key, value string, message ...string) (uint8, uint8
 // people trying to insert exploits. So the practical thing to do is just to
 // reject it.
 func (v *Validator) UTF8(key, value string, message ...string) {
-	msg := getMessage(message, MessageUTF8)
 	if !validString(value) {
-		v.Append(key, msg)
+		v.Append(key, v.getMessage(message, v.msg.UTF8))
 	}
 }
 
@@ -490,7 +464,7 @@ func (v *Validator) UTF8(key, value string, message ...string) {
 //   unicode.ASCII_Hex_Digit   0-9A-Fa-f
 func (v *Validator) Contains(key, value string, ranges []*unicode.RangeTable, runes []rune, message ...string) {
 	if !validString(value) {
-		v.Append(key, getMessage(message, MessageUTF8))
+		v.Append(key, v.getMessage(message, v.msg.UTF8))
 	}
 
 	var invalid []rune
@@ -507,7 +481,7 @@ func (v *Validator) Contains(key, value string, ranges []*unicode.RangeTable, ru
 		for i := range invalid {
 			cannot[i] = fmt.Sprintf("%q", invalid[i])
 		}
-		v.Append(key, fmt.Sprintf(getMessage(message, MessageContains), strings.Join(cannot, ", ")))
+		v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.Contains), strings.Join(cannot, ", ")))
 	}
 }
 
@@ -539,22 +513,12 @@ func containsAnyRune(r rune, runes []rune) bool {
 //
 // A maximum of 0 indicates there is no upper limit.
 func (v *Validator) Len(key, value string, min, max int, message ...string) int {
-	msg := getMessage(message, "")
-
 	l := utf8.RuneCountInString(value)
 	switch {
 	case l < min:
-		if msg != "" {
-			v.Append(key, msg)
-		} else {
-			v.Append(key, fmt.Sprintf(MessageLenLonger, min))
-		}
+		v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.LenLonger), min))
 	case max > 0 && l > max:
-		if msg != "" {
-			v.Append(key, msg)
-		} else {
-			v.Append(key, fmt.Sprintf(MessageLenShorter, max))
-		}
+		v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.LenShorter), max))
 	}
 	return l
 }
@@ -567,7 +531,7 @@ func (v *Validator) Integer(key, value string, message ...string) int64 {
 
 	i, err := strconv.ParseInt(strings.TrimSpace(value), 10, 64)
 	if err != nil {
-		v.Append(key, getMessage(message, MessageInteger))
+		v.Append(key, v.getMessage(message, v.msg.Integer))
 	}
 	return i
 }
@@ -584,7 +548,7 @@ func (v *Validator) Boolean(key, value string, message ...string) bool {
 	case "0", "n", "no", "f", "false", "off":
 		return false
 	}
-	v.Append(key, getMessage(message, MessageBool))
+	v.Append(key, v.getMessage(message, v.msg.Bool))
 	return false
 }
 
@@ -594,14 +558,9 @@ func (v *Validator) Date(key, value, layout string, message ...string) time.Time
 		return time.Time{}
 	}
 
-	msg := getMessage(message, "")
 	t, err := time.Parse(layout, value)
 	if err != nil {
-		if msg != "" {
-			v.Append(key, msg)
-		} else {
-			v.Append(key, fmt.Sprintf(MessageDate, layout))
-		}
+		v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.Date), layout))
 	}
 	return t
 }
@@ -622,9 +581,8 @@ func (v *Validator) Phone(key, value string, message ...string) string {
 		return ""
 	}
 
-	msg := getMessage(message, MessagePhone)
 	if !rePhone.MatchString(value) {
-		v.Append(key, msg)
+		v.Append(key, v.getMessage(message, v.msg.Phone))
 	}
 
 	return strings.NewReplacer("-", "", "(", "", ")", "", " ", "", ".", "").

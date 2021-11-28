@@ -250,8 +250,8 @@ func TestValidators(t *testing.T) {
 			map[string][]string{"v": {"must be shorter than 2 characters"}},
 		},
 		{
-			func(v Validator) { v.Len("v", "w00t", 1, 2, "foo") },
-			map[string][]string{"v": {"foo"}},
+			func(v Validator) { v.Len("v", "w00t", 1, 2, "foo: %v") },
+			map[string][]string{"v": {"foo: 2"}},
 		},
 		{
 			func(v Validator) { v.Len("v", "w00t", 16, 32) },
@@ -279,8 +279,8 @@ func TestValidators(t *testing.T) {
 			map[string][]string{"key": {`cannot be ‘VAL’`}},
 		},
 		{
-			func(v Validator) { v.Exclude("key", "val", []string{"VAL"}, "foo") },
-			map[string][]string{"key": {`foo`}},
+			func(v Validator) { v.Exclude("key", "val", []string{"VAL"}, "foo: %q") },
+			map[string][]string{"key": {`foo: "VAL"`}},
 		},
 		{
 			func(v Validator) { v.Exclude("key", "val", []string{"hello", "val"}) },
@@ -301,8 +301,8 @@ func TestValidators(t *testing.T) {
 			map[string][]string{"key": {`must be one of ‘valx’`}},
 		},
 		{
-			func(v Validator) { v.Include("key", "val", []string{"valx"}, "foo") },
-			map[string][]string{"key": {`foo`}},
+			func(v Validator) { v.Include("key", "val", []string{"valx"}, "foo: %q") },
+			map[string][]string{"key": {`foo: "valx"`}},
 		},
 		{
 			func(v Validator) { v.Include("key", "val", []string{"VAL"}) },
@@ -514,8 +514,8 @@ func TestValidators(t *testing.T) {
 			map[string][]string{"k": {"must be a date as ‘2006-01-02T15:04:05Z07:00’"}},
 		},
 		{
-			func(v Validator) { v.Date("k", "2017-11-14", time.RFC3339, "not valid") },
-			map[string][]string{"k": {"not valid"}},
+			func(v Validator) { v.Date("k", "2017-11-14", time.RFC3339, "not valid: %q") },
+			map[string][]string{"k": {`not valid: "2006-01-02T15:04:05Z07:00"`}},
 		},
 
 		// Email
@@ -654,8 +654,8 @@ func TestValidators(t *testing.T) {
 			map[string][]string{"v": {"must be 2 or lower"}},
 		},
 		{
-			func(v Validator) { v.Range("v", 4, 1, 2, "foo") },
-			map[string][]string{"v": {"foo"}},
+			func(v Validator) { v.Range("v", 4, 1, 2, "foo: %d") },
+			map[string][]string{"v": {"foo: 2"}},
 		},
 		{
 			func(v Validator) { v.Range("v", 4, 16, 32) },
