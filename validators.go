@@ -155,8 +155,8 @@ check:
 
 // Exclude validates that the value is not in the exclude list.
 //
-// This list is matched case-insensitive; the returned value is the same as
-// value.
+// This list is matched case-insensitive and with leading/trailing whitespace
+// ignored. The returned value is the same as the input value.
 func (v *Validator) Exclude(key, value string, exclude []string, message ...string) string {
 	val := strings.TrimSpace(strings.ToLower(value))
 	for _, e := range exclude {
@@ -165,14 +165,13 @@ func (v *Validator) Exclude(key, value string, exclude []string, message ...stri
 			return ""
 		}
 	}
-
 	return value
 }
 
 // Include validates that the value is in the include list.
 //
-// This list is matched case-insensitive; the returned value matches the casing
-// in the include list.
+// This list is matched case-insensitive and with leading/trailing whitespace
+// ignored. The returned value is the "sanitized" value that matched.
 func (v *Validator) Include(key, value string, include []string, message ...string) string {
 	if len(include) == 0 {
 		return value

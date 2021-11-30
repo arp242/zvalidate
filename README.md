@@ -8,6 +8,7 @@ other libraries:
 - No external dependencies.
 - Easy to add nested validations.
 - Not tied to HTTP (useful for validating CLI flags, for example).
+- Supports translating error messages.
 
 I originally wrote this at my previous employer
 ([github.com/teamwork/validate][tw]), this is an improved (and incompatible)
@@ -192,6 +193,17 @@ prevents "hidden" errors.
 
 i18n
 ----
+You can change the messages with `Validator.Messages`:
 
-There is no direct support for i18n, but the messages are all exported as
-`Message*` and can be replaced by your i18n system of choice.
+```go
+v := zvalidate.New()
+v = v.Locale(zvalidate.Messages{
+    Required: func() string { return myTranslateFunction("must be set") },
+    Exclude:  func() string { return myTranslateFunction("cannot be ‘%s’") },
+    // ...
+})
+```
+
+You can also use this to change the default message if you don't like one of
+them. `zvalidate.DefaultMessages` is used by default. If you don't specify one
+of the struct fields then it will fall back to the values in that struct.
