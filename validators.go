@@ -566,6 +566,16 @@ func (v *Validator) Date(key, value, layout string, message ...string) time.Time
 
 var rePhone = regexp.MustCompile(`^[0123456789+\-() .]{5,20}$`)
 
+func phone(v string) (string, bool) {
+	if v == "" {
+		return "", true
+	}
+	if !rePhone.MatchString(v) {
+		return "", false
+	}
+	return strings.NewReplacer("-", "", "(", "", ")", "", " ", "", ".", "").Replace(v), true
+}
+
 // Phone parses a phone number.
 //
 // There are a great amount of writing conventions for phone numbers:
@@ -576,14 +586,24 @@ var rePhone = regexp.MustCompile(`^[0123456789+\-() .]{5,20}$`)
 //
 // Returns the phone number with grouping/spacing characters removed.
 func (v *Validator) Phone(key, value string, message ...string) string {
-	if value == "" {
-		return ""
-	}
-
-	if !rePhone.MatchString(value) {
+	clean, ok := phone(value)
+	if !ok {
 		v.Append(key, v.getMessage(message, v.msg.Phone))
 	}
+	return clean
+}
 
-	return strings.NewReplacer("-", "", "(", "", ")", "", " ", "", ".", "").
-		Replace(value)
+// PhoneInternational parses a phone number.
+//
+// This is identical to Phone(), except that a phone must start with a "+",
+// requiring a country prefix (Phone() will deal with country prefixes as well,
+// it just isn't required).
+//
+// Returns the phone number with grouping/spacing characters removed.
+func (v *Validator) PhoneInternational(key, value string, message ...string) string {
+	clean, ok := phone(value)
+	if !ok || (clean != "" && clean[0] != '+') {
+		v.Append(key, v.getMessage(message, v.msg.PhoneInternational))
+	}
+	return clean
 }

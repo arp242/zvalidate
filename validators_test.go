@@ -636,6 +636,24 @@ func TestValidators(t *testing.T) {
 			map[string][]string{"v": {"must be a valid phone number"}},
 		},
 
+		// PhoneInternational
+		{
+			func(v Validator) { v.PhoneInternational("v", "") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.PhoneInternational("v", "12345123") },
+			map[string][]string{"v": {"must be a valid phone number with country dialing prefix"}},
+		},
+		{
+			func(v Validator) { v.PhoneInternational("v", "(+31)-12345123") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.PhoneInternational("v", "[+31]-12345123") },
+			map[string][]string{"v": {"must be a valid phone number with country dialing prefix"}},
+		},
+
 		// Range
 		{
 			func(v Validator) { v.Range("v", 4, 2, 5) },
