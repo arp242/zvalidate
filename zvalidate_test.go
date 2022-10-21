@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"zgo.at/zstd/ztest"
+	"zgo.at/zvalidate/internal/ztest"
 )
 
 func TestAs(t *testing.T) {
