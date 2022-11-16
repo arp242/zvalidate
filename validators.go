@@ -448,7 +448,7 @@ func (v *Validator) UTF8(key, value string, message ...string) {
 //
 // The value is in either the unicode range or runes list. For example:
 //
-//    zvalidate.Contains("key", val, zvalidate.AlphaNumeric, []rune{'_', '-'})
+//	zvalidate.Contains("key", val, zvalidate.AlphaNumeric, []rune{'_', '-'})
 //
 // Will allow all ASCII letters and numbers and '_' and '-'.
 //
@@ -456,11 +456,11 @@ func (v *Validator) UTF8(key, value string, message ...string) {
 //
 // Useful ranges:
 //
-//   zvalidate.AlphaNumeric    a-0A-Za-z
-//   zvalidate.ASCII           All ASCII characters except control characters.
-//   unicode.Letter            Any "letter" (in any script)
-//   unicode.Number            Any "number" (in any script)
-//   unicode.ASCII_Hex_Digit   0-9A-Fa-f
+//	zvalidate.AlphaNumeric    a-0A-Za-z
+//	zvalidate.ASCII           All ASCII characters except control characters.
+//	unicode.Letter            Any "letter" (in any script)
+//	unicode.Number            Any "number" (in any script)
+//	unicode.ASCII_Hex_Digit   0-9A-Fa-f
 func (v *Validator) Contains(key, value string, ranges []*unicode.RangeTable, runes []rune, message ...string) {
 	if !validString(value) {
 		v.Append(key, v.getMessage(message, v.msg.UTF8))
@@ -531,6 +531,36 @@ func (v *Validator) Integer(key, value string, message ...string) int64 {
 	i, err := strconv.ParseInt(strings.TrimSpace(value), 10, 64)
 	if err != nil {
 		v.Append(key, v.getMessage(message, v.msg.Integer))
+	}
+	return i
+}
+
+// Hex parses a string as a base-16 integer.
+func (v *Validator) Hex(key, value string, message ...string) int64 {
+	if value == "" {
+		return 0
+	}
+
+	value = strings.TrimPrefix(value, "0x")
+	value = strings.TrimPrefix(value, "0X")
+	i, err := strconv.ParseInt(strings.TrimSpace(value), 16, 64)
+	if err != nil {
+		v.Append(key, v.getMessage(message, v.msg.Hex))
+	}
+	return i
+}
+
+// Octal parses a string as a base-8 integer.
+func (v *Validator) Octal(key, value string, message ...string) int64 {
+	if value == "" {
+		return 0
+	}
+
+	value = strings.TrimPrefix(value, "0o")
+	value = strings.TrimPrefix(value, "0O")
+	i, err := strconv.ParseInt(strings.TrimSpace(value), 8, 64)
+	if err != nil {
+		v.Append(key, v.getMessage(message, v.msg.Octal))
 	}
 	return i
 }

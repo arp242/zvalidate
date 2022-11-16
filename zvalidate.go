@@ -141,14 +141,14 @@ func (v *Validator) HasErrors() bool {
 //
 // This makes it a bit more elegant to return from a function:
 //
-//   if v.HasErrors() {
-//       return v
-//   }
-//   return nil
+//	if v.HasErrors() {
+//	    return v
+//	}
+//	return nil
 //
 // Can now be:
 //
-//   return v.ErrorOrNil()
+//	return v.ErrorOrNil()
 func (v *Validator) ErrorOrNil() error {
 	if v.HasErrors() {
 		return v
@@ -166,23 +166,23 @@ func (v *Validator) ErrorOrNil() error {
 //
 // For example:
 //
-//   func (c Customer) validateSettings() error {
-//       v := zvalidate.New()
-//       v.Required("domain", c.Domain)
-//       v.Required("email", c.Email)
-//       return v.ErrorOrNil()
-//   }
+//	func (c Customer) validateSettings() error {
+//	    v := zvalidate.New()
+//	    v.Required("domain", c.Domain)
+//	    v.Required("email", c.Email)
+//	    return v.ErrorOrNil()
+//	}
 //
-//   v := zvalidate.New()
-//   v.Required("name", customer.Name)
+//	v := zvalidate.New()
+//	v.Required("name", customer.Name)
 //
-//   // Keys will be added as "settings.domain" and "settings.email".
-//   v.Sub("settings", "", customer.validateSettings())
+//	// Keys will be added as "settings.domain" and "settings.email".
+//	v.Sub("settings", "", customer.validateSettings())
 //
-//   // List as array; keys will be added as "addresses[0].city" etc.
-//   for i, addr := range customer.Addresses {
-//       v.Sub("addresses", i, addr.Validate())
-//   }
+//	// List as array; keys will be added as "addresses[0].city" etc.
+//	for i, addr := range customer.Addresses {
+//	    v.Sub("addresses", i, addr.Validate())
+//	}
 func (v *Validator) Sub(key, subKey string, err error) {
 	if err == nil {
 		return

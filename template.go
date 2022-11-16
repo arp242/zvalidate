@@ -29,7 +29,7 @@ func TemplateError(k string, v *Validator) template.HTML {
 // This is useful because "and" evaluates all arguments, and this will error
 // out:
 //
-//   {{if and .Validate .Validate.HasErrors}}
+//	{{if and .Validate .Validate.HasErrors}}
 func TemplateHasErrors(v *Validator) bool {
 	if v == nil {
 		return false

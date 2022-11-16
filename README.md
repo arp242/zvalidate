@@ -67,6 +67,8 @@ List of validations with abbreviated function signature (`key string, value
 | Range(min, max int)              | Minimum and maximum int value              |
 | Len(min, max int) int            | Character length of string                 |
 | Integer() int64                  | Integer value                              |
+| Hex() int64                      | base-16 hexadecimal integer                |
+| Octal() int64                    | base-8 octal integer                       |
 | Boolean() bool                   | Boolean value                              |
 | Domain() []string                | Domain name; returns list of domain labels |
 | Hostname() []string              | Any hostname                               |

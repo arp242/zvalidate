@@ -14,6 +14,8 @@ type Messages struct {
 	Exclude            func() string
 	Include            func() string
 	Integer            func() string
+	Hex                func() string
+	Octal              func() string
 	Bool               func() string
 	Date               func() string
 	Phone              func() string
@@ -38,6 +40,8 @@ var DefaultMessages = Messages{
 	Exclude:            func() string { return "cannot be ‘%s’" },
 	Include:            func() string { return "must be one of ‘%s’" },
 	Integer:            func() string { return "must be a whole number" },
+	Hex:                func() string { return "must be a whole number in base 16 (hexadecimal)" },
+	Octal:              func() string { return "must be a whole number in base 8 (octal)" },
 	Bool:               func() string { return "must be a boolean" },
 	Date:               func() string { return "must be a date as ‘%s’" },
 	Phone:              func() string { return "must be a valid phone number" },

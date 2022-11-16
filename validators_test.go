@@ -776,6 +776,45 @@ func TestInteger(t *testing.T) {
 			0,
 			map[string][]string{"k": {"must be a whole number"}},
 		},
+
+		// Hex
+		{
+			func(v Validator) int64 { return v.Hex("k", "ff") },
+			255,
+			map[string][]string{},
+		},
+		{
+			func(v Validator) int64 { return v.Hex("k", "0xff") },
+			255,
+			map[string][]string{},
+		},
+		{
+			func(v Validator) int64 { return v.Hex("k", "fg") },
+			0,
+			map[string][]string{"k": []string{"must be a whole number in base 16 (hexadecimal)"}},
+		},
+
+		// Octal
+		{
+			func(v Validator) int64 { return v.Octal("k", "777") },
+			511,
+			map[string][]string{},
+		},
+		{
+			func(v Validator) int64 { return v.Octal("k", "0o777") },
+			511,
+			map[string][]string{},
+		},
+		{
+			func(v Validator) int64 { return v.Octal("k", "0777") },
+			511,
+			map[string][]string{},
+		},
+		{
+			func(v Validator) int64 { return v.Octal("k", "778") },
+			0,
+			map[string][]string{"k": []string{"must be a whole number in base 8 (octal)"}},
+		},
 	}
 
 	for i, tt := range tests {
