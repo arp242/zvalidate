@@ -157,13 +157,13 @@ func TestString(t *testing.T) {
 
 		{Validator{map[string][]string{
 			"k": {"oh no"},
-		}, DefaultMessages}, "k: oh no.\n"},
+		}, DefaultMessages}, "k: oh no."},
 		{Validator{map[string][]string{
 			"k": {"oh no", "more"},
-		}, DefaultMessages}, "k: oh no, more.\n"},
+		}, DefaultMessages}, "k: oh no, more."},
 		{Validator{map[string][]string{
 			"k": {"oh no", "more", "even more"},
-		}, DefaultMessages}, "k: oh no, more, even more.\n"},
+		}, DefaultMessages}, "k: oh no, more, even more."},
 		{Validator{map[string][]string{
 			"k":  {"oh no", "more", "even more"},
 			"k2": {"asd"},

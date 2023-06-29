@@ -1,6 +1,6 @@
 // Package zvalidate provides simple validation for Go.
 //
-// See the README.markdown for an introduction.
+// See the README.md for an introduction.
 package zvalidate
 
 import (
@@ -240,7 +240,10 @@ func (v *Validator) String() string {
 			b.WriteString(": ")
 		}
 		b.WriteString(strings.Join(v.Errors[k], ", "))
-		b.WriteString(".\n")
+		b.WriteByte('.')
+		if len(keys) > 1 {
+			b.WriteByte('\n')
+		}
 	}
 	return b.String()
 }
