@@ -274,7 +274,7 @@ func validDomain(value string, minLabels int) ([]string, error) {
 		}
 
 		for _, c := range l {
-			if !unicode.IsLetter(c) && !unicode.IsDigit(c) && c != '-' {
+			if !unicode.IsLetter(c) && !unicode.IsDigit(c) && (c != '-' && c != '_') {
 				return nil, fmt.Errorf("invalid character: %q", c)
 			}
 		}

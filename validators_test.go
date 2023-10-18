@@ -338,6 +338,14 @@ func TestValidators(t *testing.T) {
 			func(v Validator) { v.Domain("v", "xn--pgbg2dpr.xn--mgbbbe5a") },
 			make(map[string][]string),
 		},
+		{
+			func(v Validator) { v.Domain("v", "_fo_o._exa_mple.org") },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Domain("v", "-foo-.-example.org") },
+			make(map[string][]string),
+		},
 
 		{
 			func(v Validator) { v.Domain("v", "one-label") },
