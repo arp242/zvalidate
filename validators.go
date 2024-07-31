@@ -64,12 +64,36 @@ check:
 		if val == int(0) {
 			v.Append(key, msg)
 		}
+	case int8:
+		if val == int8(0) {
+			v.Append(key, msg)
+		}
+	case int16:
+		if val == int16(0) {
+			v.Append(key, msg)
+		}
+	case int32:
+		if val == int32(0) {
+			v.Append(key, msg)
+		}
 	case int64:
 		if val == int64(0) {
 			v.Append(key, msg)
 		}
 	case uint:
 		if val == uint(0) {
+			v.Append(key, msg)
+		}
+	case uint8:
+		if val == uint8(0) {
+			v.Append(key, msg)
+		}
+	case uint16:
+		if val == uint16(0) {
+			v.Append(key, msg)
+		}
+	case uint32:
+		if val == uint32(0) {
 			v.Append(key, msg)
 		}
 	case uint64:
