@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/mail"
 	"net/url"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,164 +17,43 @@ import (
 
 // Required validates that the value is not the type's zero value.
 //
-// Currently supported types are string, int, int64, uint, uint64, bool,
-// []string, and mail.Address. It will panic if the type is not supported.
-func (v *Validator) Required(key string, value interface{}, message ...string) {
+// For slices it also checks it's not a slice of zero values.
+func (v *Validator) Required(key string, value any, message ...string) {
 	msg := v.getMessage(message, v.msg.Required)
 
-	if value == nil {
+	val := reflect.ValueOf(value)
+start:
+	if !val.IsValid() {
 		v.Append(key, msg)
 		return
 	}
-
-	var isnil bool
-	switch val := value.(type) {
-	case *string:
-		isnil = val == nil
-	case *int:
-		isnil = val == nil
-	case *int64:
-		isnil = val == nil
-	case *uint:
-		isnil = val == nil
-	case *uint64:
-		isnil = val == nil
-	case *mail.Address:
-		isnil = val == nil
-	case *time.Time:
-		isnil = val == nil
-	}
-	if isnil {
+	switch val.Kind() {
+	case reflect.Map:
+		if val.IsNil() || val.Len() == 0 {
+			v.Append(key, msg)
+		}
+	case reflect.Slice:
+		if val.IsNil() || val.Len() == 0 {
+			v.Append(key, msg)
+			return
+		}
+		for i := range val.Len() {
+			if !val.Index(i).IsZero() {
+				return
+			}
+		}
 		v.Append(key, msg)
-		return
-	}
-
-check:
-	switch val := value.(type) {
+	case reflect.Pointer:
+		if val.IsNil() {
+			v.Append(key, msg)
+			return
+		}
+		val = val.Elem()
+		goto start
 	default:
-		// This is an appropiate use of panic, as it's a programming error that
-		// should be displayed ASAP. Adding a "validation error" would be
-		// inappropriate, and returning an error cumbersome.
-		panic(fmt.Sprintf("zvalidate: not a supported type: %T", value))
-
-	case string:
-		if strings.TrimSpace(val) == "" {
-			v.Append(key, msg)
-		}
-	case int:
-		if val == int(0) {
-			v.Append(key, msg)
-		}
-	case int8:
-		if val == int8(0) {
-			v.Append(key, msg)
-		}
-	case int16:
-		if val == int16(0) {
-			v.Append(key, msg)
-		}
-	case int32:
-		if val == int32(0) {
-			v.Append(key, msg)
-		}
-	case int64:
-		if val == int64(0) {
-			v.Append(key, msg)
-		}
-	case uint:
-		if val == uint(0) {
-			v.Append(key, msg)
-		}
-	case uint8:
-		if val == uint8(0) {
-			v.Append(key, msg)
-		}
-	case uint16:
-		if val == uint16(0) {
-			v.Append(key, msg)
-		}
-	case uint32:
-		if val == uint32(0) {
-			v.Append(key, msg)
-		}
-	case uint64:
-		if val == uint64(0) {
-			v.Append(key, msg)
-		}
-	case bool:
-		if !val {
-			v.Append(key, msg)
-		}
-
-	case []byte:
-		if len(val) == 0 {
-			v.Append(key, msg)
-			return
-		}
-
-		// Make sure there is at least one non-empty entry.
-		nonEmpty := false
-		for i := range val {
-			if val[i] != 0 {
-				nonEmpty = true
-				break
-			}
-		}
-		if !nonEmpty {
-			v.Append(key, msg)
-		}
-	case []int64:
-		if len(val) == 0 {
-			v.Append(key, msg)
-		}
-	case []string:
-		if len(val) == 0 {
-			v.Append(key, msg)
-			return
-		}
-
-		// Make sure there is at least one non-empty entry.
-		nonEmpty := false
-		for i := range val {
-			if val[i] != "" { // Consider " " to be non-empty on purpose.
-				nonEmpty = true
-				break
-			}
-		}
-		if !nonEmpty {
-			v.Append(key, msg)
-		}
-
-	case mail.Address:
-		if val.Address == "" {
-			v.Append(key, msg)
-		}
-	case time.Time:
 		if val.IsZero() {
 			v.Append(key, msg)
 		}
-
-	case *string:
-		value = *val
-		goto check
-	case *int:
-		value = *val
-		goto check
-	case *int64:
-		value = *val
-		goto check
-	case *uint:
-		value = *val
-		goto check
-	case *uint64:
-		value = *val
-		goto check
-	case *mail.Address:
-		value = *val
-		goto check
-	case *time.Time:
-		value = *val
-		goto check
 	}
 }
 
@@ -196,19 +76,40 @@ func (v *Validator) Exclude(key, value string, exclude []string, message ...stri
 //
 // This list is matched case-insensitive and with leading/trailing whitespace
 // ignored. The returned value is the "sanitized" value that matched.
-func (v *Validator) Include(key, value string, include []string, message ...string) string {
-	if len(include) == 0 {
-		return value
+func (v *Validator) Include(key string, value, include any, message ...string) any {
+	var (
+		val  = reflect.ValueOf(value)
+		incl = reflect.ValueOf(include)
+	)
+	if incl.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("zvalidate.Include: include is not a slice but %T", include))
+	}
+	if val.Type() != incl.Type().Elem() {
+		panic(fmt.Sprintf("zvalidate.Include: mismatched types for value and include: %T and %T", value, include))
 	}
 
-	value = strings.TrimSpace(strings.ToLower(value))
-	for _, e := range include {
-		if strings.EqualFold(e, value) {
+	str := reflect.TypeOf("")
+	if !val.CanConvert(str) {
+		panic(fmt.Sprintf("zvalidate.Include: %T is not convertable to a string", value))
+	}
+
+	vv := strings.TrimSpace(strings.ToLower(val.Convert(str).String()))
+	if incl.Len() == 0 {
+		return vv
+	}
+
+	var (
+		all = make([]string, 0, incl.Len())
+	)
+	for i := range incl.Len() {
+		e := strings.TrimSpace(strings.ToLower(incl.Index(i).Convert(str).String()))
+		if e == vv {
 			return e
 		}
+		all = append(all, e)
 	}
 
-	v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.Include), strings.Join(include, ", ")))
+	v.Append(key, fmt.Sprintf(v.getMessage(message, v.msg.Include), strings.Join(all, ", ")))
 	return ""
 }
 

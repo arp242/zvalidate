@@ -41,7 +41,7 @@ func ExampleTemplateError() {
 	v.Append("xxx", "oh noes")
 	v.Append("hidden", "sneaky")
 
-	t.Execute(os.Stdout, map[string]interface{}{
+	t.Execute(os.Stdout, map[string]any{
 		"Validate": &v,
 	})
 

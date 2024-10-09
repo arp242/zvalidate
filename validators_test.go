@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/mail"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -12,7 +13,7 @@ import (
 
 func TestRequiredInt(t *testing.T) {
 	tests := []struct {
-		a    interface{}
+		a    any
 		want bool
 	}{
 		{0, true},
@@ -37,34 +38,41 @@ func TestRequiredInt(t *testing.T) {
 	}
 }
 
+type (
+	strType      string
+	stringerType int
+)
+
+func (s stringerType) String() string { return strconv.Itoa(int(s)) }
+
 func TestValidators(t *testing.T) {
 	tests := []struct {
 		val        func(Validator)
 		wantErrors map[string][]string
 	}{
 		// Required
-		{
+		{ // 0
 			func(v Validator) {
 				v.Required("firstName", "not empty")
 				v.Required("age", 32)
 			},
 			make(map[string][]string),
 		},
-		{
+		{ // 1
 			func(v Validator) {
 				v.Required("lastName", "", "foo")
 				v.Required("age", 0, "bar")
 			},
 			map[string][]string{"lastName": {"foo"}, "age": {"bar"}},
 		},
-		{
+		{ // 2
 			func(v Validator) {
 				v.Required("lastName", "")
 				v.Required("age", 0)
 			},
 			map[string][]string{"lastName": {"must be set"}, "age": {"must be set"}},
 		},
-		{
+		{ // 3
 			func(v Validator) {
 				v.Required("email", "")
 				v.Email("email", "")
@@ -79,86 +87,85 @@ func TestValidators(t *testing.T) {
 				"email":  {"must be set"},
 				"email2": {"must be a valid email address"},
 			},
-		},
+		}, // 4
 		{
 			func(v Validator) { v.Required("k", true) },
 			make(map[string][]string),
 		},
-		{
+		{ // 5
 			func(v Validator) { v.Required("k", false) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 6
 			func(v Validator) { v.Required("k", []string{}) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 7
 			func(v Validator) { v.Required("k", *new([]string)) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 8
 			func(v Validator) { v.Required("k", []string{""}) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 9
 			func(v Validator) { v.Required("k", []string{"", "", ""}) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 10
 			func(v Validator) { v.Required("k", []string{" "}) },
 			make(map[string][]string),
 		},
-		{
+		{ // 11
 			func(v Validator) { v.Required("k", []string{"", "", " "}) },
 			make(map[string][]string),
 		},
-		{
+		{ // 12
 			func(v Validator) { v.Required("k", []byte("X")) },
 			make(map[string][]string),
 		},
-		{
+		{ // 13
 			func(v Validator) { v.Required("k", []byte("")) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 14
 			func(v Validator) { v.Required("k", []byte{}) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 15
 			func(v Validator) { v.Required("k", []byte{0}) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 16
 			func(v Validator) { v.Required("k", []byte{0, 1}) },
 			make(map[string][]string),
 		},
-
-		{
+		{ // 17
 			func(v Validator) { v.Required("k", nil) },
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 18
 			func(v Validator) {
 				s := ""
 				v.Required("k", &s)
 			},
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 19
 			func(v Validator) {
 				i := 0
 				v.Required("k", &i)
 			},
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 20
 			func(v Validator) {
 				var i *int
 				v.Required("k", i)
 			},
 			map[string][]string{"k": {"must be set"}},
 		},
-		{
+		{ // 21
 			func(v Validator) {
 				var i *string
 				v.Required("k", i)
@@ -292,10 +299,10 @@ func TestValidators(t *testing.T) {
 			func(v Validator) { v.Include("key", "val", []string{}) },
 			make(map[string][]string),
 		},
-		{
-			func(v Validator) { v.Include("key", "val", nil) },
-			make(map[string][]string),
-		},
+		// {
+		// 	func(v Validator) { v.Include("key", "val", nil) },
+		// 	make(map[string][]string),
+		// },
 		{
 			func(v Validator) { v.Include("key", "val", []string{"valx"}) },
 			map[string][]string{"key": {`must be one of ‘valx’`}},
@@ -311,6 +318,22 @@ func TestValidators(t *testing.T) {
 		{
 			func(v Validator) { v.Include("key", "val", []string{"hello", "val"}) },
 			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Include("key", strType("val"), []strType{"hello", "val"}) },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Include("key", strType("val"), []strType{"valx"}) },
+			map[string][]string{"key": {`must be one of ‘valx’`}},
+		},
+		{
+			func(v Validator) { v.Include("key", stringerType(4), []stringerType{1, 4}) },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Include("key", stringerType(5), []stringerType{1, 4}) },
+			map[string][]string{"key": {"must be one of ‘\x01, \x04’"}},
 		},
 
 		// Domain

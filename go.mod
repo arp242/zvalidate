@@ -1,6 +1,6 @@
 module zgo.at/zvalidate
 
-go 1.18
+go 1.22
 
 retract (
 	v1.2.2
