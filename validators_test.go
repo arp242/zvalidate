@@ -39,11 +39,13 @@ func TestRequiredInt(t *testing.T) {
 }
 
 type (
-	strType      string
-	stringerType int
+	strType        string
+	stringerType   int
+	stringerStruct struct{ s string }
 )
 
-func (s stringerType) String() string { return strconv.Itoa(int(s)) }
+func (s stringerType) String() string   { return strconv.Itoa(int(s)) }
+func (s stringerStruct) String() string { return s.s }
 
 func TestValidators(t *testing.T) {
 	tests := []struct {
@@ -333,7 +335,15 @@ func TestValidators(t *testing.T) {
 		},
 		{
 			func(v Validator) { v.Include("key", stringerType(5), []stringerType{1, 4}) },
-			map[string][]string{"key": {"must be one of ‘\x01, \x04’"}},
+			map[string][]string{"key": {`must be one of ‘1, 4’`}},
+		},
+		{
+			func(v Validator) { v.Include("key", stringerStruct{"val"}, []stringerStruct{{"a"}, {"val"}}) },
+			make(map[string][]string),
+		},
+		{
+			func(v Validator) { v.Include("key", stringerStruct{"valx"}, []stringerStruct{{"a"}, {"val"}}) },
+			map[string][]string{"key": {"must be one of ‘a, val’"}},
 		},
 
 		// Domain

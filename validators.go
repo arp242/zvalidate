@@ -72,6 +72,11 @@ func (v *Validator) Exclude(key, value string, exclude []string, message ...stri
 	return value
 }
 
+var (
+	str      = reflect.TypeOf("")
+	stringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+)
+
 // Include validates that the value is in the include list.
 //
 // This list is matched case-insensitive and with leading/trailing whitespace
@@ -88,21 +93,33 @@ func (v *Validator) Include(key string, value, include any, message ...string) a
 		panic(fmt.Sprintf("zvalidate.Include: mismatched types for value and include: %T and %T", value, include))
 	}
 
-	str := reflect.TypeOf("")
-	if !val.CanConvert(str) {
-		panic(fmt.Sprintf("zvalidate.Include: %T is not convertable to a string", value))
+	if !val.CanConvert(str) && !val.Type().Implements(stringer) {
+		panic(fmt.Sprintf("zvalidate.Include: %T is not convertable to a string and doesn't implement fmt.Stringer", value))
 	}
 
-	vv := strings.TrimSpace(strings.ToLower(val.Convert(str).String()))
+	var (
+		isStringer = val.Type().Implements(stringer)
+		vv         string
+	)
+	if isStringer {
+		vv = val.Interface().(fmt.Stringer).String()
+	} else {
+		vv = strings.TrimSpace(strings.ToLower(val.Convert(str).String()))
+	}
 	if incl.Len() == 0 {
 		return vv
 	}
 
-	var (
-		all = make([]string, 0, incl.Len())
-	)
+	vv = strings.TrimSpace(strings.ToLower(vv))
+	all := make([]string, 0, incl.Len())
 	for i := range incl.Len() {
-		e := strings.TrimSpace(strings.ToLower(incl.Index(i).Convert(str).String()))
+		var e string
+		if isStringer {
+			e = incl.Index(i).Interface().(fmt.Stringer).String()
+		} else {
+			e = incl.Index(i).Convert(str).String()
+		}
+		e = strings.TrimSpace(strings.ToLower(e))
 		if e == vv {
 			return e
 		}
