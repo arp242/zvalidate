@@ -110,8 +110,13 @@ func (v Validator) Code() int { return 400 }
 func (v Validator) ErrorJSON() ([]byte, error) { return json.Marshal(v) }
 
 // Append a new error.
-func (v *Validator) Append(key, value string, format ...any) {
-	v.Errors[key] = append(v.Errors[key], fmt.Sprintf(value, format...))
+func (v *Validator) Append(key, msg string) {
+	v.Errors[key] = append(v.Errors[key], msg)
+}
+
+// Appendf appends a new error.
+func (v *Validator) Appendf(key, msg string, format ...any) {
+	v.Errors[key] = append(v.Errors[key], fmt.Sprintf(msg, format...))
 }
 
 // Pop an error, removing all errors for this key.

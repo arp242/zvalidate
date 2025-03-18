@@ -256,7 +256,7 @@ func (v *Validator) url(key, value string, local bool, message ...string) *url.U
 
 	u, err := url.Parse(value)
 	if err != nil && u == nil {
-		v.Append(key, "%s: %s", msg, err)
+		v.Appendf(key, "%s: %s", msg, err)
 		return nil
 	}
 
@@ -269,7 +269,7 @@ func (v *Validator) url(key, value string, local bool, message ...string) *url.U
 	}
 
 	if err != nil {
-		v.Append(key, "%s: %s", msg, err)
+		v.Appendf(key, "%s: %s", msg, err)
 		return nil
 	}
 
