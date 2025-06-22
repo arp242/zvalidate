@@ -477,6 +477,19 @@ func (v *Validator) Integer(key, value string, message ...string) int64 {
 	return i
 }
 
+// Integer parses a string as an integer.
+func (v *Validator) Integer32(key, value string, message ...string) int32 {
+	if value == "" {
+		return 0
+	}
+
+	i, err := strconv.ParseInt(strings.TrimSpace(value), 10, 32)
+	if err != nil {
+		v.Append(key, v.getMessage(message, v.msg.Integer))
+	}
+	return int32(i)
+}
+
 // Hex parses a string as a base-16 integer.
 func (v *Validator) Hex(key, value string, message ...string) int64 {
 	if value == "" {
